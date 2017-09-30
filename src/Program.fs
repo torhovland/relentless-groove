@@ -20,6 +20,10 @@ open src.Models
 
 let webApp =
     choose [
+        POST >=>
+            choose [
+                route "/api/v1/activities" >=> text "POST activity to Giraffe!"
+            ]
         GET >=>
             choose [
                 route "/" >=> razorHtmlView "Index" { Text = "Hello world, from Giraffe!" }
