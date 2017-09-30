@@ -8,11 +8,20 @@ open Microsoft.AspNetCore.Hosting
 open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
+open Giraffe.Tasks
 open Giraffe.HttpHandlers
+open Giraffe.HttpContextExtensions
 open Giraffe.Middleware
 open Giraffe.Razor.HttpHandlers
 open Giraffe.Razor.Middleware
 open src.Models
+
+let postActivity =
+    fun (next : HttpFunc) (ctx : HttpContext) ->
+        task {
+            let! activity = ctx.BindJson<Activity>()
+            return! text (sprintf "Posted activity %s with %i minutes per week." activity.Name activity.MinutesPerWeek) next ctx
+        }
 
 // ---------------------------------
 // Web app
@@ -22,7 +31,7 @@ let webApp =
     choose [
         POST >=>
             choose [
-                route "/api/v1/activities" >=> text "POST activity to Giraffe!"
+                route "/api/v1/activities" >=> postActivity
             ]
         GET >=>
             choose [
