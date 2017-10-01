@@ -8,7 +8,7 @@ module R = Fable.Helpers.React
 open Elmish
 open Elmish.React
 
-let logAuth : string -> obj option = import "logAuth" "./google-auth.js"
+let logAuth : unit -> obj option = import "logAuth" "./google-auth.js"
 
 type Model = int
 
@@ -28,8 +28,8 @@ let view model dispatch =
         R.button [ OnClick (fun _ -> dispatch Increment) ] [ R.str "+" ]
         R.button [ OnClick (fun _ -> dispatch LogAuth) ] [ R.str "Log auth" ] ]
 
-let doLogAuth (par : string) : unit =
-  logAuth par |> ignore
+let doLogAuth _ =
+  logAuth () |> ignore
   ()
 
 let update (msg : Msg) (count : Model) =
@@ -37,7 +37,7 @@ let update (msg : Msg) (count : Model) =
   | Failure _ -> count, Cmd.none
   | Increment -> count + 1, Cmd.none
   | Decrement -> count - 1, Cmd.none
-  | LogAuth -> count, Cmd.attemptFunc doLogAuth "foo" (string >> Failure)
+  | LogAuth -> count, Cmd.attemptFunc doLogAuth () (string >> Failure)
 
 Program.mkProgram init update view 
 |> Program.withReact "elmish-app"
