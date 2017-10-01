@@ -3,20 +3,31 @@ module FableApp
 open Fable.Core
 open Fable.Core.JsInterop
 open Fable.Import
+open Fable.Helpers.React.Props
+module R = Fable.Helpers.React
+open Elmish
+open Elmish.React
 
 let logAuth : string -> obj option = import "logAuth" "./google-auth.js"
 
-let init() =
-    let canvas = Browser.document.getElementsByTagName_canvas().[0]
-    canvas.width <- 1000.
-    canvas.height <- 800.
-    let ctx = canvas.getContext_2d()
-    // The (!^) operator checks and casts a value to an Erased Union type
-    // See http://fable.io/docs/interacting.html#Erase-attribute
-    ctx.fillStyle <- !^"rgb(200,200,0)"
-    ctx.fillRect (10., 10., 55., 50.)
-    ctx.fillStyle <- !^"rgba(0, 0, 200, 0.5)"
-    ctx.fillRect (30., 30., 55., 50.)
-    logAuth("foo") |> ignore
+type Model = int
 
-init()
+type Msg = Increment | Decrement
+    
+let init () =
+    0
+
+let view model dispatch =
+  R.div []
+      [ R.button [ OnClick (fun _ -> dispatch Decrement) ] [ R.str "-" ]
+        R.div [] [ R.str (sprintf "%A" model) ]
+        R.button [ OnClick (fun _ -> dispatch Increment) ] [ R.str "+" ] ]
+
+let update (msg:Msg) count =
+  match msg with
+  | Increment -> count + 1
+  | Decrement -> count - 1
+
+Program.mkSimple init update view 
+|> Program.withReact "elmish-app"
+|> Program.run
