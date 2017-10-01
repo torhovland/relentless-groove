@@ -1,5 +1,8 @@
 const Elm = require('./Main');
-const app = Elm.Main.embed(document.getElementById('elm-area'));
+const elmDiv = document.getElementById('elm-area');
+const app = Elm.Main.embed(elmDiv, {
+  apiUrl: process.env.API_URL,
+});
 
 export function onSignIn(googleUser) {
   var profile = googleUser.getBasicProfile();

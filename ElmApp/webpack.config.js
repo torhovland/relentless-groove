@@ -1,4 +1,6 @@
+const webpack = require('webpack');
 const path = require('path');
+require('dotenv').config();
 
 module.exports = {
   entry: [
@@ -22,6 +24,9 @@ module.exports = {
     filename: 'bundle.js',
     library: 'EntryPoint'    
   },
+  plugins: [
+    new webpack.EnvironmentPlugin(["API_URL"])
+  ],
   devServer: {
     contentBase: './public'
   },
