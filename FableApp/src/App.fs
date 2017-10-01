@@ -12,22 +12,33 @@ let logAuth : string -> obj option = import "logAuth" "./google-auth.js"
 
 type Model = int
 
-type Msg = Increment | Decrement
+type Msg = 
+  | Failure of string
+  | Increment 
+  | Decrement 
+  | LogAuth 
     
-let init () =
-    0
+let init () : Model * Cmd<Msg> =
+    0, Cmd.none
 
 let view model dispatch =
   R.div []
       [ R.button [ OnClick (fun _ -> dispatch Decrement) ] [ R.str "-" ]
         R.div [] [ R.str (sprintf "%A" model) ]
-        R.button [ OnClick (fun _ -> dispatch Increment) ] [ R.str "+" ] ]
+        R.button [ OnClick (fun _ -> dispatch Increment) ] [ R.str "+" ]
+        R.button [ OnClick (fun _ -> dispatch LogAuth) ] [ R.str "Log auth" ] ]
 
-let update (msg:Msg) count =
+let doLogAuth (par : string) : unit =
+  logAuth par |> ignore
+  ()
+
+let update (msg : Msg) (count : Model) =
   match msg with
-  | Increment -> count + 1
-  | Decrement -> count - 1
+  | Failure _ -> count, Cmd.none
+  | Increment -> count + 1, Cmd.none
+  | Decrement -> count - 1, Cmd.none
+  | LogAuth -> count, Cmd.attemptFunc doLogAuth "foo" (string >> Failure)
 
-Program.mkSimple init update view 
+Program.mkProgram init update view 
 |> Program.withReact "elmish-app"
 |> Program.run
