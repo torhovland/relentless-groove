@@ -1,0 +1,12 @@
+{
+  "version": "0.1.0",
+  "tasks": [
+      {
+          "taskName": "elm make",
+          "isBuildCommand": true,
+          "command": "node_modules\\.bin\\elm-make",
+          "args": ["src\\Main.elm"],
+          "isShellCommand": true
+      }
+  ]
+}
