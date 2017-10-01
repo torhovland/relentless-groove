@@ -69,7 +69,7 @@ type Msg
     | Increment
     | Decrement
     | PostActivity
-    | PostActivityResult (Result Http.Error (List String))
+    | PostActivityResult (Result Http.Error ())
 
 
 
@@ -80,8 +80,19 @@ postActivity apiUrl =
     let
         url =
             apiUrl ++ "/activities"
+
+        body =
+            Http.stringBody "application/json" "{ name: 'hallo', minutesPerWeek: 15 }"
     in
-    Http.post url (Http.stringBody "application/json" "{ name: 'hallo', minutesPerWeek: 15 }") (list string)
+    Http.request
+        { method = "POST"
+        , headers = []
+        , url = url
+        , body = body
+        , expect = Http.expectStringResponse (\_ -> Ok ())
+        , timeout = Nothing
+        , withCredentials = False
+        }
         |> Http.send PostActivityResult
 
 
