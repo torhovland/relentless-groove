@@ -1,22 +1,29 @@
-module src.App
+module GiraffeApp.App
 
 open System
 open System.IO
 open System.Collections.Generic
+open System.Threading.Tasks
+open Microsoft.AspNetCore.Authentication
+open Microsoft.AspNetCore.Authentication.JwtBearer
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Cors.Infrastructure
 open Microsoft.AspNetCore.Hosting
 open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
+open Microsoft.IdentityModel.Tokens
 open Giraffe.Tasks
 open Giraffe.HttpHandlers
 open Giraffe.HttpContextExtensions
 open Giraffe.Middleware
 open Giraffe.Razor.HttpHandlers
 open Giraffe.Razor.Middleware
-open src.Models
+open GiraffeApp.Models
 
+let authorize =
+    requiresAuthentication (challenge JwtBearerDefaults.AuthenticationScheme)
+    
 let postActivity =
     fun (next : HttpFunc) (ctx : HttpContext) ->
         task {
@@ -32,13 +39,15 @@ let webApp =
     choose [
         POST >=>
             choose [
-                route "/api/v1/activities" >=> postActivity
+                route "/api/v1/activities" >=> authorize >=> postActivity
             ]
         GET >=>
             choose [
-                route "/" >=> razorHtmlView "Index" { Text = "Hello world, from Giraffe!" }
+                route "/" >=> text "Hello world, from Giraffe!"
             ]
-        setStatusCode 404 >=> text "Not Found" ]
+        setStatusCode 404 >=> text "Not Found"
+    ]
+
 
 // ---------------------------------
 // Error handler
@@ -56,10 +65,24 @@ let configureCors (builder : CorsPolicyBuilder) =
     builder.WithOrigins("http://localhost:8080").AllowAnyMethod().AllowAnyHeader() |> ignore
 
 let configureApp (app : IApplicationBuilder) =
+    app.UseAuthentication() |> ignore
     app.UseCors(configureCors) |> ignore
     app.UseGiraffeErrorHandler errorHandler
     app.UseStaticFiles() |> ignore
     app.UseGiraffe webApp
+
+let authenticationOptions (o : AuthenticationOptions) =
+    o.DefaultAuthenticateScheme <- JwtBearerDefaults.AuthenticationScheme
+    o.DefaultChallengeScheme <- JwtBearerDefaults.AuthenticationScheme
+
+let jwtBearerOptions (cfg : JwtBearerOptions) =
+    cfg.SaveToken <- true
+    cfg.IncludeErrorDetails <- true
+    cfg.Authority <- "https://accounts.google.com"
+    cfg.Audience <- "471287974858-e1pgspg0nctdecdbb1jtrjldspb9vsqu.apps.googleusercontent.com"
+    cfg.TokenValidationParameters <- TokenValidationParameters (
+        ValidIssuer = "accounts.google.com"
+    )
 
 let configureServices (services : IServiceCollection) =
     let sp  = services.BuildServiceProvider()
@@ -67,6 +90,8 @@ let configureServices (services : IServiceCollection) =
     let viewsFolderPath = Path.Combine(env.ContentRootPath, "Views")
     services.AddRazorEngine viewsFolderPath |> ignore
     services.AddCors |> ignore
+    services.AddAuthentication(authenticationOptions)
+        .AddJwtBearer(Action<JwtBearerOptions> jwtBearerOptions) |> ignore
 
 let configureLogging (builder : ILoggingBuilder) =
     let filter (l : LogLevel) = l.Equals LogLevel.Error

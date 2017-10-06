@@ -1,4 +1,4 @@
-﻿namespace src.Models
+﻿namespace GiraffeApp.Models
 
 open System
 
