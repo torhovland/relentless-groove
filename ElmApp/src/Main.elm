@@ -123,7 +123,7 @@ update msg model =
             ( model, Cmd.none )
 
         Authenticated msg ->
-            ( { model | authenticatedData = msg }, Cmd.none )
+            ( { model | authenticatedData = Debug.log "authenticated: " msg }, Cmd.none )
 
 
 
