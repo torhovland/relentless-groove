@@ -4,14 +4,16 @@ open System
 open System.IO
 open System.Collections.Generic
 open System.Threading.Tasks
+open Microsoft.AspNetCore
 open Microsoft.AspNetCore.Authentication
 open Microsoft.AspNetCore.Authentication.JwtBearer
-open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Cors.Infrastructure
+open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
 open Microsoft.AspNetCore.Http
-open Microsoft.Extensions.Logging
+open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
+open Microsoft.Extensions.Logging
 open Microsoft.IdentityModel.Tokens
 open Giraffe.Tasks
 open Giraffe.HttpHandlers
@@ -28,7 +30,10 @@ let postActivity =
     fun (next : HttpFunc) (ctx : HttpContext) ->
         task {
             let! activity = ctx.BindJson<Activity>()
-            return! text (sprintf "Posted activity %s with %i minutes per week." activity.Name activity.MinutesPerWeek) next ctx
+            let configuration = ctx.GetService<IConfiguration>()
+            let configured = configuration.["DefaultConnection"]
+            let message = sprintf "Posted activity %s with %i minutes per week. Will save to %s." activity.Name activity.MinutesPerWeek configured
+            return! text message next ctx
         }
 
 // ---------------------------------
@@ -93,22 +98,11 @@ let configureServices (services : IServiceCollection) =
     services.AddAuthentication(authenticationOptions)
         .AddJwtBearer(Action<JwtBearerOptions> jwtBearerOptions) |> ignore
 
-let configureLogging (builder : ILoggingBuilder) =
-    let filter (l : LogLevel) = l.Equals LogLevel.Error
-    builder.AddFilter(filter).AddConsole().AddDebug() |> ignore
-
 [<EntryPoint>]
 let main argv =
-    let contentRoot = Directory.GetCurrentDirectory()
-    let webRoot     = Path.Combine(contentRoot, "WebRoot")
-    WebHostBuilder()
-        .UseKestrel()
-        .UseContentRoot(contentRoot)
-        .UseIISIntegration()
-        .UseWebRoot(webRoot)
-        .Configure(Action<IApplicationBuilder> configureApp)
+    WebHost.CreateDefaultBuilder()
         .ConfigureServices(configureServices)
-        .ConfigureLogging(configureLogging)
+        .Configure(Action<IApplicationBuilder> configureApp)
         .Build()
         .Run()
     0
