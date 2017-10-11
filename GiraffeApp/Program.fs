@@ -31,7 +31,7 @@ let postActivity =
         task {
             let! activity = ctx.BindJson<Activity>()
             let configuration = ctx.GetService<IConfiguration>()
-            let configured = configuration.["DefaultConnection"]
+            let configured = configuration.["TableStorage"]
             let message = sprintf "Posted activity %s with %i minutes per week. Will save to %s." activity.Name activity.MinutesPerWeek configured
             return! text message next ctx
         }
