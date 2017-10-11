@@ -15,6 +15,8 @@ open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Logging
 open Microsoft.IdentityModel.Tokens
+open Microsoft.WindowsAzure.Storage
+open Microsoft.WindowsAzure.Storage.Table
 open Giraffe.Tasks
 open Giraffe.HttpHandlers
 open Giraffe.HttpContextExtensions
@@ -31,8 +33,9 @@ let postActivity =
         task {
             let! activity = ctx.BindJson<Activity>()
             let configuration = ctx.GetService<IConfiguration>()
-            let configured = configuration.["TableStorage"]
-            let message = sprintf "Posted activity %s with %i minutes per week. Will save to %s." activity.Name activity.MinutesPerWeek configured
+            let connectionString = configuration.["TableStorage"]
+            let storageAccount = CloudStorageAccount.Parse(connectionString);
+            let message = sprintf "Posted activity %s with %i minutes per week. Will save to %s." activity.Name activity.MinutesPerWeek connectionString
             return! text message next ctx
         }
 
