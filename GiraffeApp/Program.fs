@@ -3,6 +3,7 @@ module GiraffeApp.App
 open System
 open System.IO
 open System.Collections.Generic
+open System.Security.Claims
 open System.Threading.Tasks
 open Microsoft.AspNetCore
 open Microsoft.AspNetCore.Authentication
@@ -31,13 +32,31 @@ let authorize =
 let postActivity =
     fun (next : HttpFunc) (ctx : HttpContext) ->
         task {
-            let! activity = ctx.BindJson<Activity>()
+            let identity = ctx.User.Identity
+            let claimsIdentity = downcast identity : ClaimsIdentity
+            let claim = claimsIdentity.Claims
+                        |> Seq.filter (fun c -> c.Type.EndsWith "/nameidentifier")
+                        |> Seq.head
+
+            let userId = claim.Value
+            let! activity = ctx.BindModel<ActivityType>()
+            let activityEntity = Activity.toEntity userId activity
             let configuration = ctx.GetService<IConfiguration>()
             let connectionString = configuration.["TableStorage"]
-            let storageAccount = CloudStorageAccount.Parse(connectionString);
-            let message = sprintf "Posted activity %s with %i minutes per week. Will save to %s." activity.Name activity.MinutesPerWeek connectionString
-            return! text message next ctx
-        }
+            let storageAccount = CloudStorageAccount.Parse connectionString
+            let tableClient = storageAccount.CreateCloudTableClient()
+            let table = tableClient.GetTableReference "activities"
+            let insertOperation = TableOperation.Insert activityEntity
+            let! result = table.ExecuteAsync insertOperation
+
+            if result.HttpStatusCode < 300
+            then
+                let message = sprintf "Posted activity %s with %i minutes per week." activity.Name activity.MinutesPerWeek
+                return! text message next ctx
+            else
+                let response = setStatusCode 500 >=> text "Posting activity failed." 
+                return! response next ctx
+    }
 
 // ---------------------------------
 // Web app
@@ -73,9 +92,9 @@ let configureCors (builder : CorsPolicyBuilder) =
     builder.WithOrigins("http://localhost:8080").AllowAnyMethod().AllowAnyHeader() |> ignore
 
 let configureApp (app : IApplicationBuilder) =
+    app.UseGiraffeErrorHandler errorHandler
     app.UseAuthentication() |> ignore
     app.UseCors(configureCors) |> ignore
-    app.UseGiraffeErrorHandler errorHandler
     app.UseStaticFiles() |> ignore
     app.UseGiraffe webApp
 
