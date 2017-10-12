@@ -42,9 +42,16 @@ type alias AuthenticatedData =
     }
 
 
+type alias Activity =
+    { name : String
+    , minutesPerWeek : Int
+    }
+
+
 type alias Model =
     { apiUrl : String
     , authenticatedData : AuthenticatedData
+    , activities : List Activity
     , number : Int
     }
 
@@ -53,6 +60,7 @@ init : Flags -> Navigation.Location -> ( Model, Cmd Msg )
 init flags location =
     ( { apiUrl = flags.apiUrl
       , authenticatedData = AuthenticatedData "" "" ""
+      , activities = [ Activity "foo" 15, Activity "bar" 30 ]
       , number = 0
       }
     , Cmd.none
@@ -130,6 +138,19 @@ update msg model =
 -- View
 
 
+activityView : Activity -> Html Msg
+activityView activity =
+    div []
+        [ div [] [ text (toString activity.name) ]
+        , div [] [ text (toString activity.minutesPerWeek) ]
+        ]
+
+
+topActivitiesView model =
+    div [] (List.map activityView model.activities)
+
+
+view : Model -> Html Msg
 view model =
     div []
         [ button [ onClick Decrement ] [ text "-" ]
@@ -137,6 +158,7 @@ view model =
         , button [ onClick Increment ] [ text "+" ]
         , div [] [ text (toString model.authenticatedData.name) ]
         , button [ onClick PostActivity ] [ text "Post activity" ]
+        , topActivitiesView model
         ]
 
 
