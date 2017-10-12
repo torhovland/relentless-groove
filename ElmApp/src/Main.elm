@@ -147,6 +147,17 @@ remaining activity =
     fromTimestamp (activityGoal activity - loggedTime activity)
 
 
+onScheduleSort a b =
+    compare (onScheduleRatio a) (onScheduleRatio b)
+
+
+topActivities : List Activity -> List Activity
+topActivities activities =
+    activities
+        |> List.sortWith onScheduleSort
+        |> List.take 3
+
+
 
 -- Messages
 
@@ -236,7 +247,7 @@ activityView activity =
 
 
 topActivitiesView model =
-    div [] (List.map activityView model.activities)
+    div [] (List.map activityView (topActivities model.activities))
 
 
 view : Model -> Html Msg
