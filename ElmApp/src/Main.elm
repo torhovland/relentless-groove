@@ -87,11 +87,33 @@ initActivity2 =
     Activity "bar" 30 [ LogEntry start end ]
 
 
+initActivity3 =
+    let
+        start =
+            fromTuple ( 2010, 10, 10, 10, 0, 0, 0 )
+
+        end =
+            fromTuple ( 2010, 10, 10, 10, 10, 0, 0 )
+    in
+    Activity "hello" 120 [ LogEntry start end ]
+
+
+initActivity4 =
+    let
+        start =
+            fromTuple ( 2010, 10, 10, 10, 0, 0, 0 )
+
+        end =
+            fromTuple ( 2010, 10, 10, 10, 10, 0, 0 )
+    in
+    Activity "world" 60 [ LogEntry start end ]
+
+
 init : Flags -> Navigation.Location -> ( Model, Cmd Msg )
 init flags location =
     ( { apiUrl = flags.apiUrl
       , authenticatedData = AuthenticatedData "" "" ""
-      , activities = [ initActivity1, initActivity2 ]
+      , activities = [ initActivity1, initActivity2, initActivity3, initActivity4 ]
       , number = 0
       }
     , Cmd.none
