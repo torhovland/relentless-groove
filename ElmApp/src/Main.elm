@@ -5,7 +5,8 @@ import Html.Events exposing (onClick)
 import Http
 import Json.Decode exposing (list, string)
 import Navigation
-import Time.DateTime exposing (DateTime, fromTuple, toTimestamp)
+import Numeral exposing (format)
+import Time.DateTime exposing (DateTime, fromTimestamp, fromTuple, minute, second, toISO8601, toTimestamp)
 
 
 -- Main
@@ -97,6 +98,11 @@ init flags location =
     )
 
 
+activityGoal : Activity -> Float
+activityGoal activity =
+    toFloat activity.minutesPerWeek * 60.0 * 1000.0
+
+
 duration : LogEntry -> Float
 duration logEntry =
     toTimestamp logEntry.end - toTimestamp logEntry.start
@@ -107,6 +113,16 @@ loggedTime activity =
     activity.log
         |> List.map duration
         |> List.sum
+
+
+onScheduleRatio : Activity -> Float
+onScheduleRatio activity =
+    loggedTime activity / activityGoal activity
+
+
+remaining : Activity -> DateTime
+remaining activity =
+    fromTimestamp (activityGoal activity - loggedTime activity)
 
 
 
@@ -180,12 +196,20 @@ update msg model =
 -- View
 
 
+formatTime time =
+    let
+        totalSeconds time =
+            toTimestamp time / 1000.0
+    in
+    format "00:00:00" (totalSeconds time)
+
+
 activityView : Activity -> Html Msg
 activityView activity =
     div []
         [ div [] [ text activity.name ]
-        , div [] [ text (toString activity.minutesPerWeek) ]
-        , div [] [ text (toString (loggedTime activity)) ]
+        , div [] [ text (format "0 %" (onScheduleRatio activity) ++ " on schedule.") ]
+        , div [] [ text (formatTime (remaining activity) ++ " remaining.") ]
         ]
 
 
