@@ -5,6 +5,7 @@ import Html.Events exposing (onClick)
 import Http
 import Json.Decode exposing (list, string)
 import Navigation
+import Time.DateTime exposing (DateTime, fromTuple, toTimestamp)
 
 
 -- Main
@@ -42,9 +43,16 @@ type alias AuthenticatedData =
     }
 
 
+type alias LogEntry =
+    { start : DateTime
+    , end : DateTime
+    }
+
+
 type alias Activity =
     { name : String
     , minutesPerWeek : Int
+    , log : List LogEntry
     }
 
 
@@ -56,15 +64,49 @@ type alias Model =
     }
 
 
+initActivity1 =
+    let
+        start =
+            fromTuple ( 2010, 10, 10, 10, 0, 0, 0 )
+
+        end =
+            fromTuple ( 2010, 10, 10, 10, 10, 0, 0 )
+    in
+    Activity "foo" 15 [ LogEntry start end ]
+
+
+initActivity2 =
+    let
+        start =
+            fromTuple ( 2010, 10, 10, 10, 0, 0, 0 )
+
+        end =
+            fromTuple ( 2010, 10, 10, 10, 10, 0, 0 )
+    in
+    Activity "bar" 30 [ LogEntry start end ]
+
+
 init : Flags -> Navigation.Location -> ( Model, Cmd Msg )
 init flags location =
     ( { apiUrl = flags.apiUrl
       , authenticatedData = AuthenticatedData "" "" ""
-      , activities = [ Activity "foo" 15, Activity "bar" 30 ]
+      , activities = [ initActivity1, initActivity2 ]
       , number = 0
       }
     , Cmd.none
     )
+
+
+duration : LogEntry -> Float
+duration logEntry =
+    toTimestamp logEntry.end - toTimestamp logEntry.start
+
+
+loggedTime : Activity -> Float
+loggedTime activity =
+    activity.log
+        |> List.map duration
+        |> List.sum
 
 
 
@@ -141,8 +183,9 @@ update msg model =
 activityView : Activity -> Html Msg
 activityView activity =
     div []
-        [ div [] [ text (toString activity.name) ]
+        [ div [] [ text activity.name ]
         , div [] [ text (toString activity.minutesPerWeek) ]
+        , div [] [ text (toString (loggedTime activity)) ]
         ]
 
 
