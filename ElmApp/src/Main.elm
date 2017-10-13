@@ -1,6 +1,7 @@
 port module Main exposing (..)
 
-import Html exposing (Html, button, div, text)
+import Html exposing (Html, a, button, div, main_, nav, span, table, tbody, td, text, th, thead, tr)
+import Html.Attributes exposing (class, href, id)
 import Html.Events exposing (onClick)
 import Http
 import Json.Decode exposing (list, string)
@@ -239,26 +240,56 @@ formatTime time =
 
 activityView : Activity -> Html Msg
 activityView activity =
-    div []
-        [ div [] [ text activity.name ]
-        , div [] [ text (format "0 %" (onScheduleRatio activity) ++ " on schedule.") ]
-        , div [] [ text (formatTime (remaining activity) ++ " remaining.") ]
+    tr
+        []
+        [ td [ class "mdl-data-table__cell--non-numeric" ]
+            [ text activity.name ]
+        , td []
+            [ text (formatTime (remaining activity)) ]
+        , td []
+            [ text (format "0 %" (onScheduleRatio activity)) ]
         ]
 
 
 topActivitiesView model =
-    div [] (List.map activityView (topActivities model.activities))
+    table [ class "mdl-data-table mdl-js-data-table mdl-data-table--selectable mdl-shadow--2dp" ]
+        [ thead []
+            [ tr []
+                [ th [ class "mdl-data-table__cell--non-numeric" ]
+                    [ text "Activity" ]
+                , th []
+                    [ text "Remaining" ]
+                , th []
+                    [ text "On schedule" ]
+                ]
+            ]
+        , tbody [] (List.map activityView (topActivities model.activities))
+        ]
 
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ button [ onClick Decrement ] [ text "-" ]
-        , div [] [ text (toString model.number) ]
-        , button [ onClick Increment ] [ text "+" ]
-        , div [] [ text (toString model.authenticatedData.name) ]
-        , button [ onClick PostActivity ] [ text "Post activity" ]
-        , topActivitiesView model
+    div [ class "mdl-layout mdl-js-layout mdl-layout--fixed-drawer" ]
+        [ div [ class "mdl-layout__drawer" ]
+            [ span [ class "mdl-layout-title" ]
+                [ text model.authenticatedData.name ]
+            , nav [ class "mdl-navigation" ]
+                [ a [ class "mdl-navigation__link", href "" ]
+                    [ text "Link" ]
+                , a [ class "mdl-navigation__link", href "" ]
+                    [ text "Link" ]
+                , a [ class "mdl-navigation__link", href "" ]
+                    [ text "Link" ]
+                , a [ class "mdl-navigation__link", href "" ]
+                    [ text "Link" ]
+                ]
+            ]
+        , main_ [ class "mdl-layout__content" ]
+            [ div [ id "my-signin2" ]
+                []
+            , button [ onClick PostActivity ] [ text "Post activity" ]
+            , topActivitiesView model
+            ]
         ]
 
 
