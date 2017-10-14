@@ -1,3 +1,7 @@
+.elm-area {
+  height: 100vh;
+}
+
 .mdl-layout__content {
   padding: 1em;
 }
