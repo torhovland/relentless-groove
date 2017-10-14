@@ -2,6 +2,8 @@ module Update exposing (update)
 
 import Http
 import Model exposing (Model, Msg)
+import Navigation
+import UrlParser as Url
 
 
 postActivity : String -> Cmd Msg
@@ -28,9 +30,11 @@ postActivity apiUrl =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Model.UrlChange _ ->
-            -- Not supporting change of url at the moment, just return the model unchanged, with no side effect.
-            ( model, Cmd.none )
+        Model.NewUrl url ->
+            ( model, Navigation.newUrl url )
+
+        Model.UrlChange location ->
+            ( { model | location = Url.parsePath Model.route location }, Cmd.none )
 
         Model.Increment ->
             ( { model | number = model.number + 1 }, Cmd.none )

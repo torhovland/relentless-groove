@@ -3,10 +3,12 @@ module Model
         ( Activity
         , AuthenticatedData
         , Model
-        , Msg(Authenticated, Decrement, Increment, PostActivity, PostActivityResult, UrlChange)
+        , Msg(Authenticated, Decrement, Increment, NewUrl, PostActivity, PostActivityResult, UrlChange)
+        , Route(Activities, Home, Log, Tomorrow)
         , init
         , onScheduleRatioString
         , remainingString
+        , route
         , topActivities
         )
 
@@ -14,6 +16,24 @@ import Http
 import Navigation
 import Numeral exposing (format)
 import Time.DateTime exposing (DateTime, fromTimestamp, fromTuple, toTimestamp)
+import UrlParser as Url
+
+
+type Route
+    = Home
+    | Tomorrow
+    | Activities
+    | Log
+
+
+route : Url.Parser (Route -> a) a
+route =
+    Url.oneOf
+        [ Url.map Home Url.top
+        , Url.map Tomorrow (Url.s "tomorrow")
+        , Url.map Activities (Url.s "activities")
+        , Url.map Log (Url.s "log")
+        ]
 
 
 type alias AuthenticatedData =
@@ -37,7 +57,8 @@ type alias Activity =
 
 
 type alias Model =
-    { apiUrl : String
+    { location : Maybe Route
+    , apiUrl : String
     , authenticatedData : AuthenticatedData
     , errorMessage : String
     , activities : List Activity
@@ -151,8 +172,9 @@ initActivity4 =
 
 
 init : String -> Navigation.Location -> ( Model, Cmd Msg )
-init apiUrl _ =
-    ( { apiUrl = apiUrl
+init apiUrl location =
+    ( { location = Url.parsePath route location
+      , apiUrl = apiUrl
       , authenticatedData = AuthenticatedData "" "" ""
       , errorMessage = ""
       , activities = [ initActivity1, initActivity2, initActivity3, initActivity4 ]
@@ -163,7 +185,8 @@ init apiUrl _ =
 
 
 type Msg
-    = UrlChange Navigation.Location
+    = NewUrl String
+    | UrlChange Navigation.Location
     | Authenticated AuthenticatedData
     | Increment
     | Decrement

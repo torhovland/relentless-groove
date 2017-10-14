@@ -36,6 +36,25 @@ topActivitiesView activities =
         ]
 
 
+locationView : Model -> Html Msg
+locationView model =
+    case Debug.log "location: " model.location of
+        Just Model.Home ->
+            topActivitiesView model.activities
+
+        Just Model.Tomorrow ->
+            div [] [ text "Tomorrow" ]
+
+        Just Model.Activities ->
+            div [] [ text "Activities" ]
+
+        Just Model.Log ->
+            div [] [ text "Log" ]
+
+        Nothing ->
+            div [] [ text "Unknown page" ]
+
+
 view : Model -> Html Msg
 view model =
     div [ class "mdl-layout mdl-js-layout mdl-layout--fixed-drawer" ]
@@ -43,20 +62,20 @@ view model =
             [ span [ class "mdl-layout-title" ]
                 [ text model.authenticatedData.name ]
             , nav [ class "mdl-navigation" ]
-                [ a [ class "mdl-navigation__link", href "" ]
-                    [ text "Link" ]
-                , a [ class "mdl-navigation__link", href "" ]
-                    [ text "Link" ]
-                , a [ class "mdl-navigation__link", href "" ]
-                    [ text "Link" ]
-                , a [ class "mdl-navigation__link", href "" ]
-                    [ text "Link" ]
+                [ a [ class "mdl-navigation__link", onClick (Model.NewUrl "/") ]
+                    [ text "Today" ]
+                , a [ class "mdl-navigation__link", onClick (Model.NewUrl "/tomorrow") ]
+                    [ text "Tomorrow" ]
+                , a [ class "mdl-navigation__link", onClick (Model.NewUrl "/activities") ]
+                    [ text "Activities" ]
+                , a [ class "mdl-navigation__link", onClick (Model.NewUrl "/log") ]
+                    [ text "Log" ]
                 ]
             ]
         , main_ [ class "mdl-layout__content" ]
             [ div [ id "my-signin2" ]
                 []
             , button [ onClick Model.PostActivity ] [ text "Post activity" ]
-            , topActivitiesView model.activities
+            , locationView model
             ]
         ]
