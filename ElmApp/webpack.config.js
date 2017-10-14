@@ -10,7 +10,14 @@ module.exports = {
     rules: [
       {
         test: /\.elm$/,
-        use: 'elm-webpack-loader',
+        use: [{
+          loader: 'elm-webpack-loader',
+          options: {
+              verbose: true,
+              warn: true,
+              debug: true
+          }
+        }],
         exclude: [/elm-stuff/, /node_modules/]
       }
     ]

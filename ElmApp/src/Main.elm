@@ -7,6 +7,7 @@ import Update
 import View
 
 
+main : Program Flags Model Msg
 main =
     Navigation.programWithFlags UrlChange
         { init = init
