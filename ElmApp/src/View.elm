@@ -3,18 +3,7 @@ module View exposing (view)
 import Html exposing (Html, a, button, div, main_, nav, span, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class, href, id)
 import Html.Events exposing (onClick)
-import Model exposing (..)
-
-
-onScheduleSort a b =
-    compare (onScheduleRatio a) (onScheduleRatio b)
-
-
-topActivities : List Activity -> List Activity
-topActivities activities =
-    activities
-        |> List.sortWith onScheduleSort
-        |> List.take 3
+import Model exposing (Activity, Model, Msg)
 
 
 activityView : Activity -> Html Msg
@@ -24,13 +13,14 @@ activityView activity =
         [ td [ class "mdl-data-table__cell--non-numeric" ]
             [ text activity.name ]
         , td []
-            [ text (formatTime (remaining activity)) ]
+            [ text <| Model.remainingString activity ]
         , td []
-            [ text (formatPercent (onScheduleRatio activity)) ]
+            [ text <| Model.onScheduleRatioString activity ]
         ]
 
 
-topActivitiesView model =
+topActivitiesView : List Activity -> Html Msg
+topActivitiesView activities =
     table [ class "mdl-data-table mdl-js-data-table mdl-data-table--selectable mdl-shadow--2dp" ]
         [ thead []
             [ tr []
@@ -42,7 +32,7 @@ topActivitiesView model =
                     [ text "On schedule" ]
                 ]
             ]
-        , tbody [] (List.map activityView (topActivities model.activities))
+        , tbody [] (List.map activityView (Model.topActivities activities))
         ]
 
 
@@ -66,7 +56,7 @@ view model =
         , main_ [ class "mdl-layout__content" ]
             [ div [ id "my-signin2" ]
                 []
-            , button [ onClick PostActivity ] [ text "Post activity" ]
-            , topActivitiesView model
+            , button [ onClick Model.PostActivity ] [ text "Post activity" ]
+            , topActivitiesView model.activities
             ]
         ]

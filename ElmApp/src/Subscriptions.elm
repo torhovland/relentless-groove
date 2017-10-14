@@ -1,11 +1,11 @@
 module Subscriptions exposing (subscriptions)
 
-import Model exposing (..)
-import Ports exposing (..)
+import Model exposing (Model, Msg)
+import Ports
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Sub.batch
-        [ Ports.authenticated Authenticated
+        [ Ports.authenticated Model.Authenticated
         ]

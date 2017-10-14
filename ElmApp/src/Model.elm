@@ -1,15 +1,19 @@
-module Model exposing (..)
+module Model
+    exposing
+        ( Activity
+        , AuthenticatedData
+        , Model
+        , Msg(Authenticated, Decrement, Increment, PostActivity, PostActivityResult, UrlChange)
+        , init
+        , onScheduleRatioString
+        , remainingString
+        , topActivities
+        )
 
 import Http
-import Json.Decode exposing (list, string)
 import Navigation
 import Numeral exposing (format)
 import Time.DateTime exposing (DateTime, fromTimestamp, fromTuple, toTimestamp)
-
-
-type alias Flags =
-    { apiUrl : String
-    }
 
 
 type alias AuthenticatedData =
@@ -35,6 +39,7 @@ type alias Activity =
 type alias Model =
     { apiUrl : String
     , authenticatedData : AuthenticatedData
+    , errorMessage : String
     , activities : List Activity
     , number : Int
     }
@@ -57,28 +62,47 @@ loggedTime activity =
         |> List.sum
 
 
-onScheduleRatio : Activity -> Float
-onScheduleRatio activity =
-    loggedTime activity / activityGoal activity
-
-
 remaining : Activity -> DateTime
 remaining activity =
     fromTimestamp (activityGoal activity - loggedTime activity)
 
 
-formatTime time =
-    let
-        totalSeconds time =
-            toTimestamp time / 1000.0
-    in
-    format "00:00:00" (totalSeconds time)
+onScheduleRatio : Activity -> Float
+onScheduleRatio activity =
+    loggedTime activity / activityGoal activity
 
 
-formatPercent num =
-    format "0 %" num
+onScheduleSort : Activity -> Activity -> Order
+onScheduleSort a b =
+    compare (onScheduleRatio a) (onScheduleRatio b)
 
 
+topActivities : List Activity -> List Activity
+topActivities =
+    List.sortWith onScheduleSort >> List.take 3
+
+
+formatTime : DateTime -> String
+formatTime =
+    toTimestamp >> (/) 1000.0 >> format "00:00:00"
+
+
+formatPercent : Float -> String
+formatPercent =
+    format "0 %"
+
+
+remainingString : Activity -> String
+remainingString =
+    remaining >> formatTime
+
+
+onScheduleRatioString : Activity -> String
+onScheduleRatioString =
+    onScheduleRatio >> formatPercent
+
+
+initActivity1 : Activity
 initActivity1 =
     let
         start =
@@ -90,6 +114,7 @@ initActivity1 =
     Activity "foo" 15 [ LogEntry start end ]
 
 
+initActivity2 : Activity
 initActivity2 =
     let
         start =
@@ -101,6 +126,7 @@ initActivity2 =
     Activity "bar" 30 [ LogEntry start end ]
 
 
+initActivity3 : Activity
 initActivity3 =
     let
         start =
@@ -112,6 +138,7 @@ initActivity3 =
     Activity "hello" 120 [ LogEntry start end ]
 
 
+initActivity4 : Activity
 initActivity4 =
     let
         start =
@@ -123,10 +150,11 @@ initActivity4 =
     Activity "world" 60 [ LogEntry start end ]
 
 
-init : Flags -> Navigation.Location -> ( Model, Cmd Msg )
-init flags location =
-    ( { apiUrl = flags.apiUrl
+init : String -> Navigation.Location -> ( Model, Cmd Msg )
+init apiUrl _ =
+    ( { apiUrl = apiUrl
       , authenticatedData = AuthenticatedData "" "" ""
+      , errorMessage = ""
       , activities = [ initActivity1, initActivity2, initActivity3, initActivity4 ]
       , number = 0
       }

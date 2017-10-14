@@ -1,9 +1,10 @@
 module Update exposing (update)
 
 import Http
-import Model exposing (..)
+import Model exposing (Model, Msg)
 
 
+postActivity : String -> Cmd Msg
 postActivity apiUrl =
     let
         url =
@@ -21,34 +22,31 @@ postActivity apiUrl =
         , timeout = Nothing
         , withCredentials = False
         }
-        |> Http.send PostActivityResult
+        |> Http.send Model.PostActivityResult
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        UrlChange url ->
+        Model.UrlChange _ ->
             -- Not supporting change of url at the moment, just return the model unchanged, with no side effect.
             ( model, Cmd.none )
 
-        Increment ->
+        Model.Increment ->
             ( { model | number = model.number + 1 }, Cmd.none )
 
-        Decrement ->
+        Model.Decrement ->
             ( { model | number = model.number - 1 }, Cmd.none )
 
-        PostActivity ->
+        Model.PostActivity ->
             ( model, postActivity model.apiUrl )
 
-        PostActivityResult (Ok statistics) ->
+        Model.PostActivityResult (Ok _) ->
+            -- Not handling the results yet
             ( model, Cmd.none )
 
-        PostActivityResult (Err failure) ->
-            let
-                log =
-                    Debug.log "error" failure
-            in
-            ( model, Cmd.none )
+        Model.PostActivityResult (Err failure) ->
+            ( { model | errorMessage = "Error creating activity: " ++ toString failure }, Cmd.none )
 
-        Authenticated msg ->
-            ( { model | authenticatedData = Debug.log "authenticated: " msg }, Cmd.none )
+        Model.Authenticated data ->
+            ( { model | authenticatedData = data }, Cmd.none )

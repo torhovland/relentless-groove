@@ -1,6 +1,6 @@
-port module Ports exposing (..)
+port module Ports exposing (authenticated)
 
-import Model exposing (..)
+import Model
 
 
-port authenticated : (AuthenticatedData -> msg) -> Sub msg
+port authenticated : (Model.AuthenticatedData -> msg) -> Sub msg
