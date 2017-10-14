@@ -8,7 +8,9 @@
   "scripts": {
     "start": "webpack-dev-server",
     "build:dev": "webpack --env=dev --progress --profile --colors",
-    "analyse": "elm-analyse"
+    "build:prod": "npm run analyse && webpack --env=prod --progress --profile --colors",
+    "analyse": "elm-analyse",
+    "make": "elm-make --warn src/Main.elm"
   },
   "devDependencies": {
     "dotenv": "^4.0.0",
