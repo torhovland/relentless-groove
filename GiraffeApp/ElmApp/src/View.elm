@@ -1,7 +1,7 @@
 module View exposing (view)
 
 import Html exposing (Html, a, button, div, main_, nav, span, table, tbody, td, text, th, thead, tr)
-import Html.Attributes exposing (class, href, id)
+import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
 import Model exposing (Activity, Model, Msg)
 
@@ -38,7 +38,7 @@ topActivitiesView activities =
 
 locationView : Model -> Html Msg
 locationView model =
-    case Debug.log "location: " model.location of
+    case model.location of
         Just Model.Home ->
             topActivitiesView model.activities
 
