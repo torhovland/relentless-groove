@@ -42,7 +42,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Views\*.cshtml;WebRoot\**\*">
+    <Content Include="ElmApp\public\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

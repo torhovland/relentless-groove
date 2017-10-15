@@ -14,6 +14,7 @@ open Microsoft.AspNetCore.Hosting
 open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
+open Microsoft.Extensions.FileProviders
 open Microsoft.Extensions.Logging
 open Microsoft.IdentityModel.Tokens
 open Microsoft.WindowsAzure.Storage
@@ -70,7 +71,7 @@ let webApp =
             ]
         GET >=>
             choose [
-                route "/" >=> text "Hello world, from Giraffe!"
+                route "/" >=> htmlFile "/ElmApp/public/index.html"
             ]
         setStatusCode 404 >=> text "Not Found"
     ]
@@ -91,11 +92,18 @@ let errorHandler (ex : Exception) (logger : ILogger) =
 let configureCors (builder : CorsPolicyBuilder) =
     builder.WithOrigins("http://localhost:8080").AllowAnyMethod().AllowAnyHeader() |> ignore
 
+let configureStaticFiles =
+    StaticFileOptions (
+        FileProvider = new PhysicalFileProvider(
+            Path.Combine(Directory.GetCurrentDirectory(), "ElmApp\\public")
+        )
+    )
+
 let configureApp (app : IApplicationBuilder) =
     app.UseGiraffeErrorHandler errorHandler
     app.UseAuthentication() |> ignore
     app.UseCors(configureCors) |> ignore
-    app.UseStaticFiles() |> ignore
+    app.UseStaticFiles(configureStaticFiles) |> ignore
     app.UseGiraffe webApp
 
 let authenticationOptions (o : AuthenticationOptions) =
