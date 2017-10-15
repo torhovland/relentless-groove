@@ -3223,6 +3223,10 @@ webpack-dev-server@^2.9.1:
     webpack-dev-middleware "^1.11.0"
     yargs "^6.6.0"
 
+webpack-if@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/webpack-if/-/webpack-if-0.1.2.tgz#64af1e92c5fd96888f0fba3566d7314ed71ae567"
+
 webpack-sources@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/webpack-sources/-/webpack-sources-1.0.1.tgz#c7356436a4d13123be2e2426a05d1dad9cbe65cf"

@@ -1,5 +1,7 @@
 const webpack = require('webpack');
 const path = require('path');
+const webpackIf = require('webpack-if');
+const ifProd = webpackIf.ifElse(process.env.NODE_ENV === 'production');
 require('dotenv').config();
 
 module.exports = {
@@ -15,7 +17,7 @@ module.exports = {
           options: {
               verbose: true,
               warn: true,
-              debug: true
+              debug: ifProd(false, true)
           }
         }],
         exclude: [/elm-stuff/, /node_modules/]
