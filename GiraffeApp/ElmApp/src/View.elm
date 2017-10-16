@@ -1,7 +1,7 @@
 module View exposing (view)
 
-import Html exposing (Html, button, div, main_, table, tbody, td, text, th, thead, tr)
-import Html.Attributes exposing (id)
+import Html exposing (Html, button, div, img, main_, table, tbody, td, text, th, thead, tr)
+import Html.Attributes exposing (class, id, src)
 import Html.Events exposing (onClick)
 import Material.Layout as Layout
 import Material.Options
@@ -66,7 +66,9 @@ view model =
         ]
         { header =
             [ Layout.row []
-                [ Layout.title [] [ text "Relentless Groove" ] ]
+                [ img [ class "logo", src "images/weather.svg" ] []
+                , Layout.title [] [ text "Relentless Groove" ]
+                ]
             ]
         , drawer = drawer
         , tabs = ( [], [] )

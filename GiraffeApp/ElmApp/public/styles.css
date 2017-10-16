@@ -6,6 +6,11 @@
   z-index: 9999;
 }
 
+.logo {
+  height: 90%;
+  margin-right: 1em;
+}
+
 .mdl-layout__content {
   padding: 1em;
 }
