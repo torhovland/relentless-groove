@@ -1,16 +1,11 @@
 module View exposing (view)
 
-import Html exposing (Html, a, button, div, h1, main_, nav, span, table, tbody, td, text, th, thead, tr)
-import Html.Attributes exposing (class, id, style)
+import Html exposing (Html, button, div, main_, table, tbody, td, text, th, thead, tr)
+import Html.Attributes exposing (id)
 import Html.Events exposing (onClick)
-import Material
 import Material.Layout as Layout
 import Material.Options
 import Model exposing (Activity, Model, Msg)
-
-
-type alias Mdl =
-    Material.Model
 
 
 activityView : Activity -> Html Msg
@@ -73,14 +68,14 @@ view model =
             [ Layout.row []
                 [ Layout.title [] [ text "Relentless Groove" ] ]
             ]
-        , drawer = drawer model
+        , drawer = drawer
         , tabs = ( [], [] )
         , main = [ viewBody model ]
         }
 
 
-drawer : Model -> List (Html Msg)
-drawer model =
+drawer : List (Html Msg)
+drawer =
     [ Layout.title [] [ text "Relentless Groove" ]
     , Layout.navigation
         []
