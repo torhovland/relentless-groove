@@ -4,9 +4,8 @@ import Html exposing (Html, a, button, div, h1, main_, nav, span, table, tbody, 
 import Html.Attributes exposing (class, id, style)
 import Html.Events exposing (onClick)
 import Material
-import Material.Layout
-import Material.Options exposing (css)
-import Material.Scheme
+import Material.Layout as Layout
+import Material.Options
 import Model exposing (Activity, Model, Msg)
 
 
@@ -65,19 +64,40 @@ locationView model =
 
 view : Model -> Html Msg
 view model =
-    Material.Layout.render Model.Mdl
+    Layout.render Model.Mdl
         model.mdl
-        [ Material.Layout.fixedHeader
-        , Material.Layout.fixedDrawer
+        [ Layout.fixedHeader
+        , Layout.fixedDrawer
         ]
         { header =
-            [ Material.Layout.row []
-                [ Material.Layout.title [] [ text "Relentless Groove" ] ]
+            [ Layout.row []
+                [ Layout.title [] [ text "Relentless Groove" ] ]
             ]
-        , drawer = [ text "Drawer" ]
+        , drawer = drawer model
         , tabs = ( [], [] )
         , main = [ viewBody model ]
         }
+
+
+drawer : Model -> List (Html Msg)
+drawer model =
+    [ Layout.title [] [ text "Relentless Groove" ]
+    , Layout.navigation
+        []
+        [ Layout.link
+            [ Material.Options.onClick (Model.NewUrl "/") ]
+            [ text "Today" ]
+        , Layout.link
+            [ Material.Options.onClick (Model.NewUrl "/tomorrow") ]
+            [ text "Tomorrow" ]
+        , Layout.link
+            [ Material.Options.onClick (Model.NewUrl "/activities") ]
+            [ text "Activities" ]
+        , Layout.link
+            [ Material.Options.onClick (Model.NewUrl "/log") ]
+            [ text "Log" ]
+        ]
+    ]
 
 
 viewBody : Model -> Html Msg
