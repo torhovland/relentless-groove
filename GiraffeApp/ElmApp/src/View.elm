@@ -1,16 +1,24 @@
 module View exposing (view)
 
-import Html exposing (Html, a, button, div, main_, nav, span, table, tbody, td, text, th, thead, tr)
-import Html.Attributes exposing (class, id)
+import Html exposing (Html, a, button, div, h1, main_, nav, span, table, tbody, td, text, th, thead, tr)
+import Html.Attributes exposing (class, id, style)
 import Html.Events exposing (onClick)
+import Material
+import Material.Layout
+import Material.Options exposing (css)
+import Material.Scheme
 import Model exposing (Activity, Model, Msg)
+
+
+type alias Mdl =
+    Material.Model
 
 
 activityView : Activity -> Html Msg
 activityView activity =
     tr
         []
-        [ td [ class "mdl-data-table__cell--non-numeric" ]
+        [ td []
             [ text activity.name ]
         , td []
             [ text <| Model.remainingString activity ]
@@ -21,10 +29,10 @@ activityView activity =
 
 topActivitiesView : List Activity -> Html Msg
 topActivitiesView activities =
-    table [ class "mdl-data-table mdl-js-data-table mdl-data-table--selectable mdl-shadow--2dp" ]
+    table []
         [ thead []
             [ tr []
-                [ th [ class "mdl-data-table__cell--non-numeric" ]
+                [ th []
                     [ text "Activity" ]
                 , th []
                     [ text "Remaining" ]
@@ -57,25 +65,26 @@ locationView model =
 
 view : Model -> Html Msg
 view model =
-    div [ class "mdl-layout mdl-js-layout mdl-layout--fixed-drawer" ]
-        [ div [ class "mdl-layout__drawer" ]
-            [ span [ class "mdl-layout-title" ]
-                [ text model.authenticatedData.name ]
-            , nav [ class "mdl-navigation" ]
-                [ a [ class "mdl-navigation__link", onClick (Model.NewUrl "/") ]
-                    [ text "Today" ]
-                , a [ class "mdl-navigation__link", onClick (Model.NewUrl "/tomorrow") ]
-                    [ text "Tomorrow" ]
-                , a [ class "mdl-navigation__link", onClick (Model.NewUrl "/activities") ]
-                    [ text "Activities" ]
-                , a [ class "mdl-navigation__link", onClick (Model.NewUrl "/log") ]
-                    [ text "Log" ]
-                ]
+    Material.Layout.render Model.Mdl
+        model.mdl
+        [ Material.Layout.fixedHeader
+        , Material.Layout.fixedDrawer
+        ]
+        { header =
+            [ Material.Layout.row []
+                [ Material.Layout.title [] [ text "Relentless Groove" ] ]
             ]
-        , main_ [ class "mdl-layout__content" ]
-            [ div [ id "my-signin2" ]
-                []
-            , button [ onClick Model.PostActivity ] [ text "Post activity" ]
-            , locationView model
-            ]
+        , drawer = [ text "Drawer" ]
+        , tabs = ( [], [] )
+        , main = [ viewBody model ]
+        }
+
+
+viewBody : Model -> Html Msg
+viewBody model =
+    main_ []
+        [ div [ id "my-signin2" ]
+            []
+        , button [ onClick Model.PostActivity ] [ text "Post activity" ]
+        , locationView model
         ]

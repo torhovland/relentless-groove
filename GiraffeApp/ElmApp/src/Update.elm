@@ -1,6 +1,7 @@
 module Update exposing (update)
 
 import Http
+import Material
 import Model exposing (Model, Msg)
 import Navigation
 import UrlParser as Url
@@ -35,6 +36,9 @@ update msg model =
 
         Model.UrlChange location ->
             ( { model | location = Url.parsePath Model.route location }, Cmd.none )
+
+        Model.Mdl mdlmsg ->
+            Material.update Model.Mdl mdlmsg model
 
         Model.Increment ->
             ( { model | number = model.number + 1 }, Cmd.none )

@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Material
 import Model exposing (Model, Msg)
 import Navigation
 import Subscriptions

@@ -3,7 +3,7 @@ module Model
         ( Activity
         , AuthenticatedData
         , Model
-        , Msg(Authenticated, Decrement, Increment, NewUrl, PostActivity, PostActivityResult, UrlChange)
+        , Msg(Authenticated, Decrement, Increment, Mdl, NewUrl, PostActivity, PostActivityResult, UrlChange)
         , Route(Activities, Home, Log, Tomorrow)
         , init
         , onScheduleRatioString
@@ -13,6 +13,7 @@ module Model
         )
 
 import Http
+import Material
 import Navigation
 import Numeral exposing (format)
 import Time.DateTime exposing (DateTime, fromTimestamp, fromTuple, toTimestamp)
@@ -61,6 +62,7 @@ type alias Model =
     , apiUrl : String
     , authenticatedData : AuthenticatedData
     , errorMessage : String
+    , mdl : Material.Model
     , activities : List Activity
     , number : Int
     }
@@ -177,10 +179,11 @@ init apiUrl location =
       , apiUrl = apiUrl
       , authenticatedData = AuthenticatedData "" "" ""
       , errorMessage = ""
+      , mdl = Material.model
       , activities = [ initActivity1, initActivity2, initActivity3, initActivity4 ]
       , number = 0
       }
-    , Cmd.none
+    , Material.init Mdl
     )
 
 
@@ -188,6 +191,7 @@ type Msg
     = NewUrl String
     | UrlChange Navigation.Location
     | Authenticated AuthenticatedData
+    | Mdl (Material.Msg Msg)
     | Increment
     | Decrement
     | PostActivity
