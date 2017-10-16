@@ -2,6 +2,7 @@ module Update exposing (update)
 
 import Http
 import Material
+import Material.Layout as Layout
 import Model exposing (Model, Msg)
 import Navigation
 import UrlParser as Url
@@ -32,7 +33,11 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Model.NewUrl url ->
-            ( model, Navigation.newUrl url )
+            let
+                ( afterToggleModel, afterToggleCmd ) =
+                    update (Layout.toggleDrawer Model.Mdl) model
+            in
+            ( afterToggleModel, Cmd.batch [ afterToggleCmd, Navigation.newUrl url ] )
 
         Model.UrlChange location ->
             ( { model | location = Url.parsePath Model.route location }, Cmd.none )
