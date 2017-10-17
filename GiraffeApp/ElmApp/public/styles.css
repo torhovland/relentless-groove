@@ -11,6 +11,43 @@
   margin-right: 1em;
 }
 
+.avatar {
+  width: 5em;
+  border-radius: 50%;
+  margin-right: 1em;
+}
+
+.name {
+  vertical-align: bottom;
+  color: #eceff1;
+}
+
+.drawer-header {
+  padding: 1em;
+  background-color: #263238;
+}
+
 .mdl-layout__content {
   padding: 1em;
+}
+
+.mdl-layout__drawer {
+  background-color: #37474f;
+  color: rgba(255, 255, 255, 0.56);
+  border-width: 0;
+}
+
+.mdl-layout__drawer .mdl-navigation .mdl-navigation__link {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.56);
+  font-weight: 500;
+}
+
+.mdl-layout__drawer .mdl-navigation .mdl-navigation__link:hover {
+  background-color: hsl(0, 0%, 35%);
+}
+
+.mdl-layout__drawer .mdl-navigation .mdl-navigation__link:focus {
+  background-color: hsl(0, 0%, 30%) !important;
+  outline-width: 0;
 }

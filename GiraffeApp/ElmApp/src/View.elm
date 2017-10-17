@@ -1,6 +1,6 @@
 module View exposing (view)
 
-import Html exposing (Html, button, div, img, main_, table, tbody, td, text, th, thead, tr)
+import Html exposing (Html, button, div, header, img, main_, span, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class, id, src)
 import Html.Events exposing (onClick)
 import Material.Layout as Layout
@@ -64,21 +64,27 @@ view model =
         [ Layout.fixedHeader
         , Layout.fixedDrawer
         ]
-        { header =
-            [ Layout.row []
-                [ img [ class "logo", src "images/weather.svg" ] []
-                , Layout.title [] [ text "Relentless Groove" ]
-                ]
-            ]
-        , drawer = drawer
+        { header = pageHeader
+        , drawer = drawer model.authenticatedData
         , tabs = ( [], [] )
         , main = [ viewBody model ]
         }
 
 
-drawer : List (Html Msg)
-drawer =
-    [ Layout.title [] [ text "Relentless Groove" ]
+pageHeader =
+    [ Layout.row []
+        [ img [ class "logo", src "images/weather.svg" ] []
+        , Layout.title [] [ text "Relentless Groove" ]
+        ]
+    ]
+
+
+drawer : Model.AuthenticatedData -> List (Html Msg)
+drawer authenticatedData =
+    [ header [ class "drawer-header" ]
+        [ img [ class "avatar", src authenticatedData.image_url ] []
+        , span [ class "name" ] [ text authenticatedData.name ]
+        ]
     , Layout.navigation
         []
         [ Layout.link
