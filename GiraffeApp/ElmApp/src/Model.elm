@@ -106,8 +106,10 @@ topActivities =
 
 
 formatTime : DateTime -> String
-formatTime =
-    toTimestamp >> (/) 1000.0 >> format "00:00:00"
+formatTime time =
+    toTimestamp time
+        / 1000
+        |> format "00:00:00"
 
 
 formatPercent : Float -> String
