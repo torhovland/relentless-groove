@@ -6,6 +6,16 @@
   z-index: 9999;
 }
 
+.body-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.fullpage {
+  flex-grow: 1;
+  position: relative;
+}
+
 .logo {
   height: 90%;
   margin-right: 1em;
@@ -35,8 +45,20 @@
   height: 0;
 }
 
+.relative {
+  position: relative;
+}
+
+.bottomright {
+  position: absolute;
+  bottom: 1em;
+  right: 1em;
+}
+
 .mdl-layout__content {
   padding: 1em;
+  display: flex;
+  flex-direction: column;
 }
 
 .mdl-layout__drawer {

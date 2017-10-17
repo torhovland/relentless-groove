@@ -34,10 +34,19 @@ update msg model =
     case msg of
         Model.NewUrl url ->
             let
-                ( afterToggleModel, afterToggleCmd ) =
-                    update (Layout.toggleDrawer Model.Mdl) model
+                layout =
+                    model.mdl.layout
+
+                newLayout =
+                    { layout | isDrawerOpen = False }
+
+                mdl =
+                    model.mdl
+
+                newMdl =
+                    { mdl | layout = newLayout }
             in
-            ( afterToggleModel, Cmd.batch [ afterToggleCmd, Navigation.newUrl url ] )
+            ( { model | mdl = newMdl }, Navigation.newUrl url )
 
         Model.UrlChange location ->
             ( { model | location = Url.parsePath Model.route location }, Cmd.none )

@@ -3,6 +3,8 @@ module View exposing (view)
 import Html exposing (Html, button, div, header, img, main_, span, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class, id, src)
 import Html.Events exposing (onClick)
+import Material.Button
+import Material.Icon
 import Material.Layout as Layout
 import Material.Options
 import Model exposing (Activity, Model, Msg)
@@ -47,7 +49,21 @@ locationView model =
             div [] [ text "Tomorrow" ]
 
         Just Model.Activities ->
-            Model.sortedActivities model.activities |> activitiesView
+            div [ class "fullpage" ]
+                [ Model.sortedActivities model.activities
+                    |> activitiesView
+                , div [ class "bottomright" ]
+                    [ Material.Button.render Model.Mdl
+                        [ 0 ]
+                        model.mdl
+                        [ Material.Button.fab
+                        , Material.Button.colored
+                        , Material.Button.ripple
+                        , Material.Options.onClick <| Model.NewUrl "/new-activity"
+                        ]
+                        [ Material.Icon.i "add" ]
+                    ]
+                ]
 
         Just Model.Log ->
             div [] [ text "Log" ]
@@ -87,17 +103,20 @@ drawer authenticatedData =
     , Layout.navigation
         []
         [ Layout.link
-            [ Material.Options.onClick (Model.NewUrl "/") ]
+            [ Material.Options.onClick <| Model.NewUrl "/" ]
             [ text "Today" ]
         , Layout.link
-            [ Material.Options.onClick (Model.NewUrl "/tomorrow") ]
+            [ Material.Options.onClick <| Model.NewUrl "/tomorrow" ]
             [ text "Tomorrow" ]
         , Layout.link
-            [ Material.Options.onClick (Model.NewUrl "/activities") ]
+            [ Material.Options.onClick <| Model.NewUrl "/log" ]
+            [ text "Log" ]
+        , Layout.link
+            [ Material.Options.onClick <| Model.NewUrl "/activities" ]
             [ text "Activities" ]
         , Layout.link
-            [ Material.Options.onClick (Model.NewUrl "/log") ]
-            [ text "Log" ]
+            [ Material.Options.onClick <| Model.NewUrl "/new-activity" ]
+            [ text "New activity type" ]
         ]
     ]
 
@@ -116,7 +135,7 @@ signinView authenticatedData =
 
 viewBody : Model -> Html Msg
 viewBody model =
-    main_ []
+    div [ class "body-container fullpage" ]
         [ signinView model.authenticatedData
         , button [ onClick Model.PostActivity ] [ text "Post activity" ]
         , locationView model
