@@ -83,7 +83,7 @@ drawer : Model.AuthenticatedData -> List (Html Msg)
 drawer authenticatedData =
     [ header [ class "drawer-header" ]
         [ img [ class "avatar", src authenticatedData.image_url ] []
-        , span [ class "name" ] [ text authenticatedData.name ]
+        , div [ class "name" ] [ text authenticatedData.name ]
         ]
     , Layout.navigation
         []
