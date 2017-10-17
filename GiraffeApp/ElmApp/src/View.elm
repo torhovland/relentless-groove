@@ -103,11 +103,22 @@ drawer authenticatedData =
     ]
 
 
+signinView authenticatedData =
+    div
+        [ id "my-signin2"
+        , class <|
+            if authenticatedData.id_token == "" then
+                "visible"
+            else
+                "invisible"
+        ]
+        []
+
+
 viewBody : Model -> Html Msg
 viewBody model =
     main_ []
-        [ div [ id "my-signin2" ]
-            []
+        [ signinView model.authenticatedData
         , button [ onClick Model.PostActivity ] [ text "Post activity" ]
         , locationView model
         ]

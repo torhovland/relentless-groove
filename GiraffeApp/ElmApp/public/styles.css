@@ -31,6 +31,10 @@
   background-color: #263238;
 }
 
+.invisible {
+  height: 0;
+}
+
 .mdl-layout__content {
   padding: 1em;
 }
