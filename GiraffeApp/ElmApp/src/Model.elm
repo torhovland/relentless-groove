@@ -9,6 +9,7 @@ module Model
         , onScheduleRatioString
         , remainingString
         , route
+        , sortedActivities
         , topActivities
         )
 
@@ -95,14 +96,22 @@ onScheduleRatio activity =
     loggedTime activity / activityGoal activity
 
 
-onScheduleSort : Activity -> Activity -> Order
-onScheduleSort a b =
-    compare (onScheduleRatio a) (onScheduleRatio b)
-
-
 topActivities : List Activity -> List Activity
 topActivities =
+    let
+        onScheduleSort a b =
+            compare (onScheduleRatio a) (onScheduleRatio b)
+    in
     List.sortWith onScheduleSort >> List.take 3
+
+
+sortedActivities : List Activity -> List Activity
+sortedActivities =
+    let
+        lexicalSort a b =
+            compare a.name b.name
+    in
+    List.sortWith lexicalSort
 
 
 formatTime : DateTime -> String

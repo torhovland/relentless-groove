@@ -21,8 +21,7 @@ activityView activity =
         ]
 
 
-topActivitiesView : List Activity -> Html Msg
-topActivitiesView activities =
+activitiesView activityList =
     table []
         [ thead []
             [ tr []
@@ -34,7 +33,7 @@ topActivitiesView activities =
                     [ text "On schedule" ]
                 ]
             ]
-        , tbody [] (List.map activityView (Model.topActivities activities))
+        , tbody [] <| List.map activityView activityList
         ]
 
 
@@ -42,13 +41,13 @@ locationView : Model -> Html Msg
 locationView model =
     case model.location of
         Just Model.Home ->
-            topActivitiesView model.activities
+            Model.topActivities model.activities |> activitiesView
 
         Just Model.Tomorrow ->
             div [] [ text "Tomorrow" ]
 
         Just Model.Activities ->
-            div [] [ text "Activities" ]
+            Model.sortedActivities model.activities |> activitiesView
 
         Just Model.Log ->
             div [] [ text "Log" ]
