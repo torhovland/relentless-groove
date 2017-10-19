@@ -1,13 +1,14 @@
 module View exposing (view)
 
-import Html exposing (Html, button, div, header, img, input, label, main_, span, table, tbody, td, text, th, thead, tr)
+import Html exposing (Html, button, div, header, img, input, label, main_, p, span, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class, for, id, name, src, type_, value)
 import Html.Events exposing (onClick)
 import Material.Button
 import Material.Icon
-import Material.Layout as Layout
+import Material.Layout
 import Material.Options
 import Material.Textfield
+import Material.Typography
 import Model exposing (Activity, Model, Msg)
 
 
@@ -42,7 +43,10 @@ activitiesView activityList =
 
 newActivityView mdl newActivity =
     div []
-        [ div []
+        [ Material.Options.styled p
+            [ Material.Typography.headline ]
+            [ text "New activity type" ]
+        , div []
             [ Material.Textfield.render Model.Mdl
                 [ 0 ]
                 mdl
@@ -71,14 +75,29 @@ locationView : Model -> Html Msg
 locationView model =
     case model.location of
         Just Model.Home ->
-            Model.topActivities model.activities |> activitiesView
+            div []
+                [ Material.Options.styled p
+                    [ Material.Typography.headline ]
+                    [ text "To do now" ]
+                , Model.topActivities model.activities |> activitiesView
+                ]
 
         Just Model.Tomorrow ->
-            div [] [ text "Tomorrow" ]
+            div []
+                [ Material.Options.styled p
+                    [ Material.Typography.headline ]
+                    [ text "To do tomorrow" ]
+                , Material.Options.styled p
+                    [ Material.Typography.subhead ]
+                    [ text "Unless you do some of it today" ]
+                ]
 
         Just Model.Activities ->
             div [ class "fullpage" ]
-                [ Model.sortedActivities model.activities
+                [ Material.Options.styled p
+                    [ Material.Typography.headline ]
+                    [ text "All your relentless activities" ]
+                , Model.sortedActivities model.activities
                     |> activitiesView
                 , div [ class "bottomright" ]
                     [ Material.Button.render Model.Mdl
@@ -94,7 +113,11 @@ locationView model =
                 ]
 
         Just Model.Log ->
-            div [] [ text "Log" ]
+            div []
+                [ Material.Options.styled p
+                    [ Material.Typography.headline ]
+                    [ text "Activity log" ]
+                ]
 
         Just Model.NewActivity ->
             newActivityView model.mdl model.newActivity
@@ -105,10 +128,10 @@ locationView model =
 
 view : Model -> Html Msg
 view model =
-    Layout.render Model.Mdl
+    Material.Layout.render Model.Mdl
         model.mdl
-        [ Layout.fixedHeader
-        , Layout.fixedDrawer
+        [ Material.Layout.fixedHeader
+        , Material.Layout.fixedDrawer
         ]
         { header = pageHeader
         , drawer = drawer model.authenticatedData
@@ -118,9 +141,9 @@ view model =
 
 
 pageHeader =
-    [ Layout.row []
+    [ Material.Layout.row []
         [ img [ class "logo", src "images/weather.svg" ] []
-        , Layout.title [] [ text "Relentless Groove" ]
+        , Material.Layout.title [] [ text "Relentless Groove" ]
         ]
     ]
 
@@ -131,21 +154,21 @@ drawer authenticatedData =
         [ img [ class "avatar", src authenticatedData.image_url ] []
         , div [ class "name" ] [ text authenticatedData.name ]
         ]
-    , Layout.navigation
+    , Material.Layout.navigation
         []
-        [ Layout.link
+        [ Material.Layout.link
             [ Material.Options.onClick <| Model.NewUrl "/" ]
             [ text "Today" ]
-        , Layout.link
+        , Material.Layout.link
             [ Material.Options.onClick <| Model.NewUrl "/tomorrow" ]
             [ text "Tomorrow" ]
-        , Layout.link
+        , Material.Layout.link
             [ Material.Options.onClick <| Model.NewUrl "/log" ]
             [ text "Log" ]
-        , Layout.link
+        , Material.Layout.link
             [ Material.Options.onClick <| Model.NewUrl "/activities" ]
             [ text "Activities" ]
-        , Layout.link
+        , Material.Layout.link
             [ Material.Options.onClick <| Model.NewUrl "/new-activity" ]
             [ text "New activity type" ]
         ]
