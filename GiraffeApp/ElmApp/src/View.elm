@@ -1,12 +1,13 @@
 module View exposing (view)
 
-import Html exposing (Html, button, div, header, img, main_, span, table, tbody, td, text, th, thead, tr)
-import Html.Attributes exposing (class, id, src)
+import Html exposing (Html, button, div, header, img, input, label, main_, span, table, tbody, td, text, th, thead, tr)
+import Html.Attributes exposing (class, for, id, name, src, type_, value)
 import Html.Events exposing (onClick)
 import Material.Button
 import Material.Icon
 import Material.Layout as Layout
 import Material.Options
+import Material.Textfield
 import Model exposing (Activity, Model, Msg)
 
 
@@ -39,6 +40,20 @@ activitiesView activityList =
         ]
 
 
+newActivityView mdl newActivity =
+    div []
+        [ Material.Textfield.render Model.Mdl
+            [ 0 ]
+            mdl
+            [ Material.Textfield.label "Name of activity type"
+            , Material.Textfield.floatingLabel
+            , Material.Textfield.value newActivity.name
+            , Material.Options.onInput Model.ChangeNewActivityName
+            ]
+            []
+        ]
+
+
 locationView : Model -> Html Msg
 locationView model =
     case model.location of
@@ -67,6 +82,9 @@ locationView model =
 
         Just Model.Log ->
             div [] [ text "Log" ]
+
+        Just Model.NewActivity ->
+            newActivityView model.mdl model.newActivity
 
         Nothing ->
             div [] [ text "Unknown page" ]

@@ -3,8 +3,18 @@ module Model
         ( Activity
         , AuthenticatedData
         , Model
-        , Msg(Authenticated, Decrement, Increment, Mdl, NewUrl, PostActivity, PostActivityResult, UrlChange)
-        , Route(Activities, Home, Log, Tomorrow)
+        , Msg
+            ( Authenticated
+            , ChangeNewActivityName
+            , Decrement
+            , Increment
+            , Mdl
+            , NewUrl
+            , PostActivity
+            , PostActivityResult
+            , UrlChange
+            )
+        , Route(Activities, Home, Log, NewActivity, Tomorrow)
         , init
         , onScheduleRatioString
         , remainingString
@@ -24,8 +34,9 @@ import UrlParser as Url
 type Route
     = Home
     | Tomorrow
-    | Activities
     | Log
+    | Activities
+    | NewActivity
 
 
 route : Url.Parser (Route -> a) a
@@ -33,8 +44,9 @@ route =
     Url.oneOf
         [ Url.map Home Url.top
         , Url.map Tomorrow (Url.s "tomorrow")
-        , Url.map Activities (Url.s "activities")
         , Url.map Log (Url.s "log")
+        , Url.map Activities (Url.s "activities")
+        , Url.map NewActivity (Url.s "new-activity")
         ]
 
 
@@ -65,6 +77,7 @@ type alias Model =
     , errorMessage : String
     , mdl : Material.Model
     , activities : List Activity
+    , newActivity : Activity
     , number : Int
     }
 
@@ -192,6 +205,7 @@ init apiUrl location =
       , errorMessage = ""
       , mdl = Material.model
       , activities = [ initActivity1, initActivity2, initActivity3, initActivity4 ]
+      , newActivity = Activity "" 15 []
       , number = 0
       }
     , Material.init Mdl
@@ -203,6 +217,7 @@ type Msg
     | UrlChange Navigation.Location
     | Authenticated AuthenticatedData
     | Mdl (Material.Msg Msg)
+    | ChangeNewActivityName String
     | Increment
     | Decrement
     | PostActivity

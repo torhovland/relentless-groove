@@ -54,6 +54,16 @@ update msg model =
         Model.Mdl mdlmsg ->
             Material.update Model.Mdl mdlmsg model
 
+        Model.ChangeNewActivityName name ->
+            let
+                newActivity =
+                    model.newActivity
+
+                updatedActivity =
+                    { newActivity | name = name }
+            in
+            ( { model | newActivity = updatedActivity }, Cmd.none )
+
         Model.Increment ->
             ( { model | number = model.number + 1 }, Cmd.none )
 
