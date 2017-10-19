@@ -37,7 +37,8 @@ module.exports = {
     new webpack.EnvironmentPlugin(["API_URL"])
   ],
   devServer: {
-    contentBase: './public'
+    contentBase: './public',
+    historyApiFallback: true
   },
   devtool: "source-map"
 }
