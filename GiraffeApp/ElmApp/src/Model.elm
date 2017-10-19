@@ -10,12 +10,13 @@ module Model
             , Increment
             , Mdl
             , NewUrl
-            , PostActivity
             , PostActivityResult
+            , SaveActivityType
             , UrlChange
             )
         , Route(Activities, Home, Log, NewActivity, Tomorrow)
         , init
+        , initActivity
         , onScheduleRatioString
         , remainingString
         , route
@@ -149,6 +150,11 @@ onScheduleRatioString =
     onScheduleRatio >> formatPercent
 
 
+initActivity : Activity
+initActivity =
+    Activity "" 15 []
+
+
 initActivity1 : Activity
 initActivity1 =
     let
@@ -205,7 +211,7 @@ init apiUrl location =
       , errorMessage = ""
       , mdl = Material.model
       , activities = [ initActivity1, initActivity2, initActivity3, initActivity4 ]
-      , newActivity = Activity "" 15 []
+      , newActivity = initActivity
       , number = 0
       }
     , Material.init Mdl
@@ -218,7 +224,7 @@ type Msg
     | Authenticated AuthenticatedData
     | Mdl (Material.Msg Msg)
     | ChangeNewActivityName String
+    | SaveActivityType
     | Increment
     | Decrement
-    | PostActivity
     | PostActivityResult (Result Http.Error ())

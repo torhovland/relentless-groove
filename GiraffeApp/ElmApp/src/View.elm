@@ -42,15 +42,28 @@ activitiesView activityList =
 
 newActivityView mdl newActivity =
     div []
-        [ Material.Textfield.render Model.Mdl
-            [ 0 ]
-            mdl
-            [ Material.Textfield.label "Name of activity type"
-            , Material.Textfield.floatingLabel
-            , Material.Textfield.value newActivity.name
-            , Material.Options.onInput Model.ChangeNewActivityName
+        [ div []
+            [ Material.Textfield.render Model.Mdl
+                [ 0 ]
+                mdl
+                [ Material.Textfield.label "Name of activity type"
+                , Material.Textfield.floatingLabel
+                , Material.Textfield.value newActivity.name
+                , Material.Options.onInput Model.ChangeNewActivityName
+                ]
+                []
             ]
-            []
+        , div []
+            [ Material.Button.render Model.Mdl
+                [ 0 ]
+                mdl
+                [ Material.Button.raised
+                , Material.Button.colored
+                , Material.Button.ripple
+                , Material.Options.onClick Model.SaveActivityType
+                ]
+                [ text "Save activity type" ]
+            ]
         ]
 
 
@@ -155,6 +168,5 @@ viewBody : Model -> Html Msg
 viewBody model =
     div [ class "body-container fullpage" ]
         [ signinView model.authenticatedData
-        , button [ onClick Model.PostActivity ] [ text "Post activity" ]
         , locationView model
         ]

@@ -2,25 +2,23 @@ module Update exposing (update)
 
 import Http
 import Material
-import Material.Layout as Layout
 import Model exposing (Model, Msg)
 import Navigation
 import UrlParser as Url
 
 
-postActivity : String -> Cmd Msg
-postActivity apiUrl =
+postActivity : String -> Model.Activity -> Cmd Msg
+postActivity apiUrl activity =
     let
-        url =
-            apiUrl ++ "/activities"
-
         body =
-            Http.stringBody "application/json" "{ name: 'hallo', minutesPerWeek: 15 }"
+            activity
+                |> toString
+                |> Http.stringBody "application/json"
     in
     Http.request
         { method = "POST"
         , headers = []
-        , url = url
+        , url = apiUrl ++ "/activities"
         , body = body
         , expect = Http.expectStringResponse (\_ -> Ok ())
         , timeout = Nothing
@@ -64,14 +62,19 @@ update msg model =
             in
             ( { model | newActivity = updatedActivity }, Cmd.none )
 
+        Model.SaveActivityType ->
+            ( { model
+                | activities = model.newActivity :: model.activities
+                , newActivity = Model.initActivity
+              }
+            , postActivity model.apiUrl model.newActivity
+            )
+
         Model.Increment ->
             ( { model | number = model.number + 1 }, Cmd.none )
 
         Model.Decrement ->
             ( { model | number = model.number - 1 }, Cmd.none )
-
-        Model.PostActivity ->
-            ( model, postActivity model.apiUrl )
 
         Model.PostActivityResult (Ok _) ->
             -- Not handling the results yet
