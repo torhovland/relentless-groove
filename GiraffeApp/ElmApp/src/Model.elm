@@ -1,11 +1,13 @@
 module Model
     exposing
         ( Activity
+        , ActivityEdit
         , AuthenticatedData
         , Model
         , Msg
             ( Authenticated
-            , ChangeNewActivityName
+            , ChangeActivityName
+            , ChangeActivitySlider
             , Decrement
             , Increment
             , Mdl
@@ -17,6 +19,8 @@ module Model
         , Route(Activities, Home, Log, NewActivity, Tomorrow)
         , init
         , initActivity
+        , initActivityEdit
+        , minutesPerWeek
         , onScheduleRatioString
         , remainingString
         , route
@@ -71,6 +75,12 @@ type alias Activity =
     }
 
 
+type alias ActivityEdit =
+    { activity : Activity
+    , sliderValue : Int
+    }
+
+
 type alias Model =
     { location : Maybe Route
     , apiUrl : String
@@ -78,7 +88,7 @@ type alias Model =
     , errorMessage : String
     , mdl : Material.Model
     , activities : List Activity
-    , newActivity : Activity
+    , activityEdit : ActivityEdit
     , number : Int
     }
 
@@ -150,9 +160,28 @@ onScheduleRatioString =
     onScheduleRatio >> formatPercent
 
 
+minutesPerWeek : ActivityEdit -> Int
+minutesPerWeek activity =
+    let
+        slider =
+            activity.sliderValue
+    in
+    if slider <= 12 then
+        slider * 5
+    else if slider <= 20 then
+        12 * 5 + (slider - 12) * 15
+    else
+        12 * 5 + 8 * 15 + (slider - 20) * 30
+
+
 initActivity : Activity
 initActivity =
     Activity "" 15 []
+
+
+initActivityEdit : ActivityEdit
+initActivityEdit =
+    ActivityEdit initActivity 3
 
 
 initActivity1 : Activity
@@ -211,7 +240,7 @@ init apiUrl location =
       , errorMessage = ""
       , mdl = Material.model
       , activities = [ initActivity1, initActivity2, initActivity3, initActivity4 ]
-      , newActivity = initActivity
+      , activityEdit = initActivityEdit
       , number = 0
       }
     , Material.init Mdl
@@ -223,7 +252,8 @@ type Msg
     | UrlChange Navigation.Location
     | Authenticated AuthenticatedData
     | Mdl (Material.Msg Msg)
-    | ChangeNewActivityName String
+    | ChangeActivityName String
+    | ChangeActivitySlider Float
     | SaveActivityType
     | Increment
     | Decrement

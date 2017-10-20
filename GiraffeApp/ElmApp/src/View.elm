@@ -2,11 +2,12 @@ module View exposing (view)
 
 import Html exposing (Html, button, div, header, img, input, label, main_, p, span, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class, for, id, name, src, type_, value)
-import Html.Events exposing (onClick)
+import Material
 import Material.Button
 import Material.Icon
 import Material.Layout
 import Material.Options
+import Material.Slider
 import Material.Textfield
 import Material.Typography
 import Model exposing (Activity, Model, Msg)
@@ -25,6 +26,7 @@ activityView activity =
         ]
 
 
+activitiesView : List Activity -> Html Msg
 activitiesView activityList =
     table []
         [ thead []
@@ -41,22 +43,60 @@ activitiesView activityList =
         ]
 
 
-newActivityView mdl newActivity =
+formatMinutes minutes =
+    let
+        hoursPart =
+            if minutes >= 120 then
+                toString (minutes // 60) ++ " hours"
+            else if minutes >= 60 then
+                "1 hour"
+            else
+                ""
+
+        remainingMinutes =
+            minutes % 60
+
+        minutesPart =
+            if remainingMinutes > 0 then
+                toString remainingMinutes ++ " minutes"
+            else
+                ""
+    in
+    if (hoursPart /= "") && (minutesPart /= "") then
+        hoursPart ++ " and " ++ minutesPart
+    else if minutesPart /= "" then
+        minutesPart
+    else if hoursPart /= "" then
+        hoursPart
+    else
+        ""
+
+
+editActivityView : Material.Model -> Model.ActivityEdit -> Html Msg
+editActivityView mdl activityEdit =
     div []
         [ Material.Options.styled p
             [ Material.Typography.headline ]
             [ text "New activity type" ]
-        , div []
-            [ Material.Textfield.render Model.Mdl
-                [ 0 ]
-                mdl
-                [ Material.Textfield.label "Name of activity type"
-                , Material.Textfield.floatingLabel
-                , Material.Textfield.value newActivity.name
-                , Material.Options.onInput Model.ChangeNewActivityName
-                ]
-                []
+        , Material.Textfield.render Model.Mdl
+            [ 0 ]
+            mdl
+            [ Material.Textfield.label "Name of activity type"
+            , Material.Textfield.floatingLabel
+            , Material.Textfield.value activityEdit.activity.name
+            , Material.Options.onInput Model.ChangeActivityName
             ]
+            []
+        , Material.Slider.view
+            [ Material.Slider.onChange Model.ChangeActivitySlider
+            , Material.Slider.value <| toFloat activityEdit.sliderValue
+            , Material.Slider.max 34
+            , Material.Slider.min 1
+            , Material.Slider.step 1
+            ]
+        , Material.Options.styled p
+            [ Material.Typography.body1 ]
+            [ text <| formatMinutes (Model.minutesPerWeek activityEdit) ++ " per week." ]
         , div []
             [ Material.Button.render Model.Mdl
                 [ 0 ]
@@ -120,7 +160,7 @@ locationView model =
                 ]
 
         Just Model.NewActivity ->
-            newActivityView model.mdl model.newActivity
+            editActivityView model.mdl model.activityEdit
 
         Nothing ->
             div [] [ text "Unknown page" ]
@@ -133,19 +173,19 @@ view model =
         [ Material.Layout.fixedHeader
         , Material.Layout.fixedDrawer
         ]
-        { header = pageHeader
+        { header = [ pageHeader ]
         , drawer = drawer model.authenticatedData
         , tabs = ( [], [] )
         , main = [ viewBody model ]
         }
 
 
+pageHeader : Html msg
 pageHeader =
-    [ Material.Layout.row []
+    Material.Layout.row []
         [ img [ class "logo", src "images/weather.svg" ] []
         , Material.Layout.title [] [ text "Relentless Groove" ]
         ]
-    ]
 
 
 drawer : Model.AuthenticatedData -> List (Html Msg)
@@ -175,6 +215,7 @@ drawer authenticatedData =
     ]
 
 
+signinView : Model.AuthenticatedData -> Html msg
 signinView authenticatedData =
     div
         [ id "my-signin2"

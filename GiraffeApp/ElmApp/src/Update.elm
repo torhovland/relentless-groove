@@ -29,6 +29,10 @@ postActivity apiUrl activity =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
+    let
+        activityEdit =
+            model.activityEdit
+    in
     case msg of
         Model.NewUrl url ->
             let
@@ -52,22 +56,26 @@ update msg model =
         Model.Mdl mdlmsg ->
             Material.update Model.Mdl mdlmsg model
 
-        Model.ChangeNewActivityName name ->
+        Model.ChangeActivityName name ->
             let
-                newActivity =
-                    model.newActivity
-
-                updatedActivity =
-                    { newActivity | name = name }
+                activity =
+                    model.activityEdit.activity
             in
-            ( { model | newActivity = updatedActivity }, Cmd.none )
+            ( { model | activityEdit = { activityEdit | activity = { activity | name = name } } }, Cmd.none )
+
+        Model.ChangeActivitySlider value ->
+            ( { model | activityEdit = { activityEdit | sliderValue = round value } }, Cmd.none )
 
         Model.SaveActivityType ->
+            let
+                activity =
+                    model.activityEdit.activity
+            in
             ( { model
-                | activities = model.newActivity :: model.activities
-                , newActivity = Model.initActivity
+                | activities = activity :: model.activities
+                , activityEdit = Model.initActivityEdit
               }
-            , postActivity model.apiUrl model.newActivity
+            , postActivity model.apiUrl activity
             )
 
         Model.Increment ->
