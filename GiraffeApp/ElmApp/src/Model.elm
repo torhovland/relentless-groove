@@ -6,6 +6,7 @@ module Model
         , Model
         , Msg
             ( Authenticated
+            , ChangeActivityImage
             , ChangeActivityName
             , ChangeActivitySlider
             , Decrement
@@ -71,6 +72,7 @@ type alias LogEntry =
 
 type alias Activity =
     { name : String
+    , imageUrl : String
     , minutesPerWeek : Int
     , log : List LogEntry
     }
@@ -186,7 +188,7 @@ updatedActivity activityEdit =
 
 initActivity : Activity
 initActivity =
-    Activity "" 15 []
+    Activity "" "" 15 []
 
 
 initActivityEdit : ActivityEdit
@@ -203,7 +205,7 @@ initActivity1 =
         end =
             fromTuple ( 2010, 10, 10, 10, 10, 0, 0 )
     in
-    Activity "foo" 15 [ LogEntry start end ]
+    Activity "foo" "https://www.iconfinder.com/icons/854156/download/svg/128" 15 [ LogEntry start end ]
 
 
 initActivity2 : Activity
@@ -215,7 +217,7 @@ initActivity2 =
         end =
             fromTuple ( 2010, 10, 10, 10, 10, 0, 0 )
     in
-    Activity "bar" 30 [ LogEntry start end ]
+    Activity "bar" "https://www.iconfinder.com/icons/854153/download/svg/128" 30 [ LogEntry start end ]
 
 
 initActivity3 : Activity
@@ -227,7 +229,7 @@ initActivity3 =
         end =
             fromTuple ( 2010, 10, 10, 10, 10, 0, 0 )
     in
-    Activity "hello" 120 [ LogEntry start end ]
+    Activity "hello" "https://www.iconfinder.com/icons/854149/download/svg/128" 120 [ LogEntry start end ]
 
 
 initActivity4 : Activity
@@ -239,7 +241,7 @@ initActivity4 =
         end =
             fromTuple ( 2010, 10, 10, 10, 10, 0, 0 )
     in
-    Activity "world" 60 [ LogEntry start end ]
+    Activity "world" "https://www.iconfinder.com/icons/854160/download/svg/128" 60 [ LogEntry start end ]
 
 
 init : String -> Navigation.Location -> ( Model, Cmd Msg )
@@ -263,6 +265,7 @@ type Msg
     | Authenticated AuthenticatedData
     | Mdl (Material.Msg Msg)
     | ChangeActivityName String
+    | ChangeActivityImage String
     | ChangeActivitySlider Float
     | SaveActivityType
     | Increment

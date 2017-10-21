@@ -76,28 +76,49 @@ formatMinutes minutes =
 editActivityView : Material.Model -> Model.ActivityEdit -> Html Msg
 editActivityView mdl activityEdit =
     div []
-        [ Material.Options.styled p
-            [ Material.Typography.headline ]
-            [ text "New activity type" ]
-        , Material.Textfield.render Model.Mdl
-            [ 0 ]
-            mdl
-            [ Material.Textfield.label "Name of activity type"
-            , Material.Textfield.floatingLabel
-            , Material.Textfield.value activityEdit.activity.name
-            , Material.Options.onInput Model.ChangeActivityName
+        [ div []
+            [ Material.Options.styled p
+                [ Material.Typography.headline ]
+                [ text "New activity type" ]
+            , Material.Options.styled p
+                [ Material.Typography.title ]
+                [ text "Activity details" ]
+            , Material.Textfield.render Model.Mdl
+                [ 0 ]
+                mdl
+                [ Material.Textfield.label "Name of activity type"
+                , Material.Textfield.floatingLabel
+                , Material.Textfield.value activityEdit.activity.name
+                , Material.Options.onInput Model.ChangeActivityName
+                ]
+                []
             ]
-            []
-        , Material.Slider.view
-            [ Material.Slider.onChange Model.ChangeActivitySlider
-            , Material.Slider.value <| toFloat activityEdit.sliderValue
-            , Material.Slider.max 34
-            , Material.Slider.min 1
-            , Material.Slider.step 1
+        , div []
+            [ Material.Textfield.render Model.Mdl
+                [ 0 ]
+                mdl
+                [ Material.Textfield.label "URL to activity icon"
+                , Material.Textfield.floatingLabel
+                , Material.Textfield.value activityEdit.activity.imageUrl
+                , Material.Options.onInput Model.ChangeActivityImage
+                ]
+                []
             ]
-        , Material.Options.styled p
-            [ Material.Typography.body1 ]
-            [ text <| formatMinutes (Model.minutesPerWeek activityEdit) ++ " per week." ]
+        , div []
+            [ Material.Options.styled p
+                [ Material.Typography.title ]
+                [ text "Relentlessness of the activity" ]
+            , Material.Slider.view
+                [ Material.Slider.onChange Model.ChangeActivitySlider
+                , Material.Slider.value <| toFloat activityEdit.sliderValue
+                , Material.Slider.max 34
+                , Material.Slider.min 1
+                , Material.Slider.step 1
+                ]
+            , Material.Options.styled p
+                [ Material.Typography.body1 ]
+                [ text <| formatMinutes (Model.minutesPerWeek activityEdit) ++ " per week." ]
+            ]
         , div []
             [ Material.Button.render Model.Mdl
                 [ 0 ]

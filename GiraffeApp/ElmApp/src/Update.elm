@@ -63,6 +63,13 @@ update msg model =
             in
             ( { model | activityEdit = { activityEdit | activity = { activity | name = name } } }, Cmd.none )
 
+        Model.ChangeActivityImage url ->
+            let
+                activity =
+                    model.activityEdit.activity
+            in
+            ( { model | activityEdit = { activityEdit | activity = { activity | imageUrl = url } } }, Cmd.none )
+
         Model.ChangeActivitySlider value ->
             ( { model | activityEdit = { activityEdit | sliderValue = round value } }, Cmd.none )
 
