@@ -1,7 +1,7 @@
 module View exposing (view)
 
-import Html exposing (Html, button, div, header, img, input, label, main_, p, span, table, tbody, td, text, th, thead, tr)
-import Html.Attributes exposing (class, for, id, name, src, type_, value)
+import Html exposing (Html, div, header, img, p, table, tbody, td, text, th, thead, tr)
+import Html.Attributes exposing (class, id, src)
 import Material
 import Material.Button
 import Material.Icon
@@ -43,6 +43,7 @@ activitiesView activityList =
         ]
 
 
+formatMinutes : Int -> String
 formatMinutes minutes =
     let
         hoursPart =
