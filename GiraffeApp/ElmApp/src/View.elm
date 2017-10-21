@@ -2,6 +2,7 @@ module View exposing (view)
 
 import Html exposing (Html, div, header, img, p, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class, id, src)
+import Html.Events exposing (onClick)
 import Material
 import Material.Button
 import Material.Grid as Grid
@@ -18,7 +19,13 @@ import Model exposing (Activity, Model, Msg)
 activityView : Activity -> Html Msg
 activityView activity =
     Material.List.li [ Material.List.withSubtitle ]
-        [ Material.List.content []
+        [ Material.List.content
+            [ Material.Options.attribute <|
+                Html.Events.onClick <|
+                    Model.NewUrl <|
+                        "/logActivity/"
+                            ++ toString activity.id
+            ]
             [ Material.List.avatarImage activity.imageUrl []
             , text activity.name
             , Material.List.subtitle [] [ text <| Model.remainingString activity ++ " to do" ]
