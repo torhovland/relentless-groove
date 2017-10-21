@@ -74,6 +74,7 @@ update msg model =
             ( { model
                 | activities = updatedActivity :: model.activities
                 , activityEdit = Model.initActivityEdit
+                , location = Just Model.Activities
               }
             , postActivity model.apiUrl updatedActivity
             )
