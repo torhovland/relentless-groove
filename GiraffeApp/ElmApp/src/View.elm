@@ -4,6 +4,7 @@ import Html exposing (Html, div, header, img, p, table, tbody, td, text, th, the
 import Html.Attributes exposing (class, id, src)
 import Material
 import Material.Button
+import Material.Grid as Grid
 import Material.Icon
 import Material.Layout
 import Material.List
@@ -21,8 +22,8 @@ activityView activity =
             [ Material.List.avatarImage activity.imageUrl []
             , text activity.name
             , Material.List.subtitle [] [ text <| Model.remainingString activity ++ " to do" ]
-            , Material.List.subtitle [] [ text <| Model.onScheduleRatioString activity ++ " on schedule" ]
             ]
+        , text <| Model.onScheduleRatioString activity
         ]
 
 
@@ -96,10 +97,13 @@ locationView model =
     case model.location of
         Just Model.Home ->
             div []
-                [ Material.Options.styled p
-                    [ Material.Typography.headline ]
-                    [ text "To do now" ]
-                , Model.topActivities model.activities |> activitiesView
+                [ Grid.grid []
+                    [ Grid.cell
+                        [ Grid.size Grid.Tablet 8, Grid.size Grid.Desktop 6, Grid.offset Grid.Desktop 3 ]
+                        [ Material.Options.styled Html.h4 [ Material.Typography.headline ] [ text "To do now" ]
+                        , Model.topActivities model.activities |> activitiesView
+                        ]
+                    ]
                 ]
 
         Just Model.Tomorrow ->
@@ -114,11 +118,13 @@ locationView model =
 
         Just Model.Activities ->
             div [ class "fullpage" ]
-                [ Material.Options.styled p
-                    [ Material.Typography.headline ]
-                    [ text "All your relentless activities" ]
-                , Model.sortedActivities model.activities
-                    |> activitiesView
+                [ Grid.grid []
+                    [ Grid.cell
+                        [ Grid.size Grid.Tablet 8, Grid.size Grid.Desktop 6, Grid.offset Grid.Desktop 3 ]
+                        [ Material.Options.styled Html.h4 [ Material.Typography.headline ] [ text "All your relentless activities" ]
+                        , Model.sortedActivities model.activities |> activitiesView
+                        ]
+                    ]
                 , div [ class "bottomright" ]
                     [ Material.Button.render Model.Mdl
                         [ 0 ]
