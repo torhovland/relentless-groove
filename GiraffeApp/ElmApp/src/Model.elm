@@ -18,6 +18,7 @@ module Model
             , UrlChange
             )
         , Route(Activities, Home, Log, NewActivity, Tomorrow)
+        , formatMinutes
         , init
         , initActivity
         , initActivityEdit
@@ -141,11 +142,24 @@ sortedActivities =
     List.sortWith lexicalSort
 
 
-formatTime : DateTime -> String
-formatTime time =
+toMinutes : DateTime -> Int
+toMinutes time =
+    round <|
+        toTimestamp time
+            / 1000
+            / 60
+
+
+formatTimeShort : DateTime -> String
+formatTimeShort time =
     toTimestamp time
         / 1000
         |> format "00:00:00"
+
+
+formatTimeLong : DateTime -> String
+formatTimeLong =
+    toMinutes >> formatMinutes
 
 
 formatPercent : Float -> String
@@ -155,12 +169,42 @@ formatPercent =
 
 remainingString : Activity -> String
 remainingString =
-    remaining >> formatTime
+    remaining >> formatTimeLong
 
 
 onScheduleRatioString : Activity -> String
 onScheduleRatioString =
     onScheduleRatio >> formatPercent
+
+
+formatMinutes : Int -> String
+formatMinutes minutes =
+    let
+        hoursPart =
+            if minutes >= 120 then
+                toString (minutes // 60) ++ " hours"
+            else if minutes >= 60 then
+                "1 hour"
+            else
+                ""
+
+        remainingMinutes =
+            minutes % 60
+
+        minutesPart =
+            if remainingMinutes > 0 then
+                toString remainingMinutes ++ " minutes"
+            else
+                ""
+    in
+    if (hoursPart /= "") && (minutesPart /= "") then
+        hoursPart ++ " and " ++ minutesPart
+    else if minutesPart /= "" then
+        minutesPart
+    else if hoursPart /= "" then
+        hoursPart
+    else
+        ""
 
 
 minutesPerWeek : ActivityEdit -> Int
@@ -205,7 +249,7 @@ initActivity1 =
         end =
             fromTuple ( 2010, 10, 10, 10, 10, 0, 0 )
     in
-    Activity "foo" "https://www.iconfinder.com/icons/854156/download/svg/128" 15 [ LogEntry start end ]
+    Activity "foo" "http://www.contentwritingshop.co.uk/wp-content/uploads/content-writing-1200x800.jpg" 15 [ LogEntry start end ]
 
 
 initActivity2 : Activity
@@ -217,7 +261,7 @@ initActivity2 =
         end =
             fromTuple ( 2010, 10, 10, 10, 10, 0, 0 )
     in
-    Activity "bar" "https://www.iconfinder.com/icons/854153/download/svg/128" 30 [ LogEntry start end ]
+    Activity "bar" "https://www.passion4dancing.com/wp-content/uploads/2015/10/Dance-confidence.jpg" 30 [ LogEntry start end ]
 
 
 initActivity3 : Activity
@@ -229,7 +273,7 @@ initActivity3 =
         end =
             fromTuple ( 2010, 10, 10, 10, 10, 0, 0 )
     in
-    Activity "hello" "https://www.iconfinder.com/icons/854149/download/svg/128" 120 [ LogEntry start end ]
+    Activity "hello" "https://theredlist.com/media/database/muses/icon/sport/cycling/030-cycling-theredlist.jpg" 120 [ LogEntry start end ]
 
 
 initActivity4 : Activity
@@ -241,7 +285,7 @@ initActivity4 =
         end =
             fromTuple ( 2010, 10, 10, 10, 10, 0, 0 )
     in
-    Activity "world" "https://www.iconfinder.com/icons/854160/download/svg/128" 60 [ LogEntry start end ]
+    Activity "world" "https://i0.wp.com/www.flandersfamily.info/web/wp-content/uploads/2011/07/Chores.png" 60 [ LogEntry start end ]
 
 
 init : String -> Navigation.Location -> ( Model, Cmd Msg )

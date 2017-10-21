@@ -6,6 +6,7 @@ import Material
 import Material.Button
 import Material.Icon
 import Material.Layout
+import Material.List
 import Material.Options
 import Material.Slider
 import Material.Textfield
@@ -15,62 +16,19 @@ import Model exposing (Activity, Model, Msg)
 
 activityView : Activity -> Html Msg
 activityView activity =
-    tr
-        []
-        [ td []
-            [ text activity.name ]
-        , td []
-            [ text <| Model.remainingString activity ]
-        , td []
-            [ text <| Model.onScheduleRatioString activity ]
+    Material.List.li [ Material.List.withSubtitle ]
+        [ Material.List.content []
+            [ Material.List.avatarImage activity.imageUrl []
+            , text activity.name
+            , Material.List.subtitle [] [ text <| Model.remainingString activity ++ " to do" ]
+            , Material.List.subtitle [] [ text <| Model.onScheduleRatioString activity ++ " on schedule" ]
+            ]
         ]
 
 
 activitiesView : List Activity -> Html Msg
 activitiesView activityList =
-    table []
-        [ thead []
-            [ tr []
-                [ th []
-                    [ text "Activity" ]
-                , th []
-                    [ text "Remaining" ]
-                , th []
-                    [ text "On schedule" ]
-                ]
-            ]
-        , tbody [] <| List.map activityView activityList
-        ]
-
-
-formatMinutes : Int -> String
-formatMinutes minutes =
-    let
-        hoursPart =
-            if minutes >= 120 then
-                toString (minutes // 60) ++ " hours"
-            else if minutes >= 60 then
-                "1 hour"
-            else
-                ""
-
-        remainingMinutes =
-            minutes % 60
-
-        minutesPart =
-            if remainingMinutes > 0 then
-                toString remainingMinutes ++ " minutes"
-            else
-                ""
-    in
-    if (hoursPart /= "") && (minutesPart /= "") then
-        hoursPart ++ " and " ++ minutesPart
-    else if minutesPart /= "" then
-        minutesPart
-    else if hoursPart /= "" then
-        hoursPart
-    else
-        ""
+    Material.List.ul [] <| List.map activityView activityList
 
 
 editActivityView : Material.Model -> Model.ActivityEdit -> Html Msg
@@ -117,7 +75,7 @@ editActivityView mdl activityEdit =
                 ]
             , Material.Options.styled p
                 [ Material.Typography.body1 ]
-                [ text <| formatMinutes (Model.minutesPerWeek activityEdit) ++ " per week." ]
+                [ text <| Model.formatMinutes (Model.minutesPerWeek activityEdit) ++ " per week." ]
             ]
         , div []
             [ Material.Button.render Model.Mdl
