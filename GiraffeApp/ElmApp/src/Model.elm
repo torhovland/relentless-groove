@@ -26,6 +26,7 @@ module Model
         , route
         , sortedActivities
         , topActivities
+        , updatedActivity
         )
 
 import Http
@@ -172,6 +173,15 @@ minutesPerWeek activity =
         12 * 5 + (slider - 12) * 15
     else
         12 * 5 + 8 * 15 + (slider - 20) * 30
+
+
+updatedActivity : ActivityEdit -> Activity
+updatedActivity activityEdit =
+    let
+        activity =
+            activityEdit.activity
+    in
+    { activity | minutesPerWeek = minutesPerWeek activityEdit }
 
 
 initActivity : Activity

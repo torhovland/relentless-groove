@@ -68,14 +68,14 @@ update msg model =
 
         Model.SaveActivityType ->
             let
-                activity =
-                    model.activityEdit.activity
+                updatedActivity =
+                    Model.updatedActivity model.activityEdit
             in
             ( { model
-                | activities = activity :: model.activities
+                | activities = updatedActivity :: model.activities
                 , activityEdit = Model.initActivityEdit
               }
-            , postActivity model.apiUrl activity
+            , postActivity model.apiUrl updatedActivity
             )
 
         Model.Increment ->
