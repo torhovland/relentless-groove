@@ -23,7 +23,7 @@ activityView activity =
             [ Material.Options.attribute <|
                 Html.Events.onClick <|
                     Model.NewUrl <|
-                        "/logActivity/"
+                        "/log-activity/"
                             ++ toString activity.id
             ]
             [ Material.List.avatarImage activity.imageUrl []
@@ -155,8 +155,35 @@ locationView model =
         Just Model.NewActivity ->
             editActivityView model.mdl model.activityEdit
 
+        Just (Model.LogActivity id) ->
+            let
+                maybeActivity =
+                    Model.activityById id model.activities
+            in
+            case maybeActivity of
+                Just activity ->
+                    div []
+                        [ Material.Options.styled p
+                            [ Material.Typography.headline ]
+                            [ text "Log time on activity" ]
+                        , Material.Options.styled p
+                            [ Material.Typography.subhead ]
+                            [ text <| activity.name ]
+                        ]
+
+                Nothing ->
+                    div []
+                        [ Material.Options.styled p
+                            [ Material.Typography.headline ]
+                            [ text "Unknown activity id" ]
+                        ]
+
         Nothing ->
-            div [] [ text "Unknown page" ]
+            div []
+                [ Material.Options.styled p
+                    [ Material.Typography.headline ]
+                    [ text "Unknown page" ]
+                ]
 
 
 view : Model -> Html Msg

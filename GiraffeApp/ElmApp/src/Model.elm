@@ -16,7 +16,8 @@ module Model
             , SaveActivityType
             , UrlChange
             )
-        , Route(Activities, Home, Log, NewActivity, Tomorrow)
+        , Route(Activities, Home, Log, LogActivity, NewActivity, Tomorrow)
+        , activityById
         , formatMinutes
         , init
         , initActivity
@@ -35,7 +36,7 @@ import Material
 import Navigation
 import Numeral exposing (format)
 import Time.DateTime exposing (DateTime, fromTimestamp, fromTuple, toTimestamp)
-import UrlParser as Url
+import UrlParser as Url exposing ((</>))
 
 
 type Route
@@ -44,6 +45,7 @@ type Route
     | Log
     | Activities
     | NewActivity
+    | LogActivity Int
 
 
 route : Url.Parser (Route -> a) a
@@ -54,6 +56,7 @@ route =
         , Url.map Log (Url.s "log")
         , Url.map Activities (Url.s "activities")
         , Url.map NewActivity (Url.s "new-activity")
+        , Url.map LogActivity (Url.s "log-activity" </> Url.int)
         ]
 
 
@@ -94,6 +97,13 @@ type alias Model =
     , activities : List Activity
     , activityEdit : ActivityEdit
     }
+
+
+activityById : Int -> List Activity -> Maybe Activity
+activityById id activities =
+    activities
+        |> List.filter (\a -> a.id == id)
+        |> List.head
 
 
 activityGoal : Activity -> Float
