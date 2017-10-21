@@ -35,6 +35,9 @@ update msg model =
             model.activityEdit
     in
     case msg of
+        Model.Tick time ->
+            ( { model | time = time }, Cmd.none )
+
         Model.NewUrl url ->
             let
                 layout =
@@ -115,3 +118,25 @@ update msg model =
 
         Model.Authenticated data ->
             ( { model | authenticatedData = data }, Cmd.none )
+
+        Model.StartActivity id ->
+            let
+                activity =
+                    Model.activityById id model.activities
+
+                updatedActivities =
+                    List.map
+                        (\a ->
+                            if a.id == id then
+                                { a | log = Model.LogEntry model.time Nothing :: a.log }
+                            else
+                                a
+                        )
+                        model.activities
+            in
+            ( { model
+                | activities = updatedActivities
+                , location = Just Model.Activities
+              }
+            , Cmd.none
+            )

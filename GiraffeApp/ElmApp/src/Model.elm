@@ -3,6 +3,7 @@ module Model
         ( Activity
         , ActivityEdit
         , AuthenticatedData
+        , LogEntry
         , Model
         , Msg
             ( Authenticated
@@ -14,6 +15,8 @@ module Model
             , NewUrl
             , PostActivityResult
             , SaveActivityType
+            , StartActivity
+            , Tick
             , UrlChange
             )
         , Route(Activities, Home, Log, LogActivity, NewActivity, Tomorrow)
@@ -35,7 +38,7 @@ import Http
 import Material
 import Navigation
 import Numeral exposing (format)
-import Time.DateTime exposing (DateTime, fromTimestamp, fromTuple, toTimestamp)
+import Time exposing (Time)
 import UrlParser as Url exposing ((</>))
 
 
@@ -68,8 +71,8 @@ type alias AuthenticatedData =
 
 
 type alias LogEntry =
-    { start : DateTime
-    , end : DateTime
+    { start : Time
+    , end : Maybe Time
     }
 
 
@@ -89,7 +92,8 @@ type alias ActivityEdit =
 
 
 type alias Model =
-    { location : Maybe Route
+    { time : Time
+    , location : Maybe Route
     , apiUrl : String
     , authenticatedData : AuthenticatedData
     , errorMessage : String
@@ -111,35 +115,37 @@ activityGoal activity =
     toFloat activity.minutesPerWeek * 60.0 * 1000.0
 
 
-duration : LogEntry -> Float
-duration logEntry =
-    toTimestamp logEntry.end - toTimestamp logEntry.start
+duration : Model -> LogEntry -> Float
+duration model logEntry =
+    Maybe.withDefault model.time logEntry.end - logEntry.start
 
 
-loggedTime : Activity -> Float
-loggedTime activity =
+loggedTime : Model -> Activity -> Float
+loggedTime model activity =
     activity.log
-        |> List.map duration
+        |> List.map (duration model)
         |> List.sum
 
 
-remaining : Activity -> DateTime
-remaining activity =
-    fromTimestamp (activityGoal activity - loggedTime activity)
+remaining : Model -> Activity -> Time
+remaining model activity =
+    activityGoal activity - loggedTime model activity
 
 
-onScheduleRatio : Activity -> Float
-onScheduleRatio activity =
-    loggedTime activity / activityGoal activity
+onScheduleRatio : Model -> Activity -> Float
+onScheduleRatio model activity =
+    loggedTime model activity / activityGoal activity
 
 
-topActivities : List Activity -> List Activity
-topActivities =
+topActivities : Model -> List Activity
+topActivities model =
     let
         onScheduleSort a b =
-            compare (onScheduleRatio a) (onScheduleRatio b)
+            compare (onScheduleRatio model a) (onScheduleRatio model b)
     in
-    List.sortWith onScheduleSort >> List.take 3
+    model.activities
+        |> List.sortWith onScheduleSort
+        |> List.take 3
 
 
 sortedActivities : List Activity -> List Activity
@@ -151,22 +157,17 @@ sortedActivities =
     List.sortWith lexicalSort
 
 
-toMinutes : DateTime -> Int
+toMinutes : Time -> Int
 toMinutes time =
-    round <|
-        toTimestamp time
-            / 1000
-            / 60
+    round (time / 1000 / 60)
 
 
-formatTimeShort : DateTime -> String
+formatTimeShort : Time -> String
 formatTimeShort time =
-    toTimestamp time
-        / 1000
-        |> format "00:00:00"
+    format "00:00:00" (time / 1000)
 
 
-formatTimeLong : DateTime -> String
+formatTimeLong : Time -> String
 formatTimeLong =
     toMinutes >> formatMinutes
 
@@ -176,14 +177,14 @@ formatPercent =
     format "0 %"
 
 
-remainingString : Activity -> String
-remainingString =
-    remaining >> formatTimeLong
+remainingString : Model -> Activity -> String
+remainingString model =
+    remaining model >> formatTimeLong
 
 
-onScheduleRatioString : Activity -> String
-onScheduleRatioString =
-    onScheduleRatio >> formatPercent
+onScheduleRatioString : Model -> Activity -> String
+onScheduleRatioString model =
+    onScheduleRatio model >> formatPercent
 
 
 formatMinutes : Int -> String
@@ -251,55 +252,44 @@ initActivityEdit =
 
 initActivity1 : Activity
 initActivity1 =
-    let
-        start =
-            fromTuple ( 2010, 10, 10, 10, 0, 0, 0 )
-
-        end =
-            fromTuple ( 2010, 10, 10, 10, 10, 0, 0 )
-    in
-    Activity 1 "foo" "http://www.contentwritingshop.co.uk/wp-content/uploads/content-writing-1200x800.jpg" 15 [ LogEntry start end ]
+    Activity 1
+        "foo"
+        "http://www.contentwritingshop.co.uk/wp-content/uploads/content-writing-1200x800.jpg"
+        15
+        [ LogEntry 0 (Just <| 10 * 60) ]
 
 
 initActivity2 : Activity
 initActivity2 =
-    let
-        start =
-            fromTuple ( 2010, 10, 10, 10, 0, 0, 0 )
-
-        end =
-            fromTuple ( 2010, 10, 10, 10, 10, 0, 0 )
-    in
-    Activity 2 "bar" "https://www.passion4dancing.com/wp-content/uploads/2015/10/Dance-confidence.jpg" 30 [ LogEntry start end ]
+    Activity 2
+        "bar"
+        "https://www.passion4dancing.com/wp-content/uploads/2015/10/Dance-confidence.jpg"
+        30
+        [ LogEntry 0 (Just <| 10 * 60) ]
 
 
 initActivity3 : Activity
 initActivity3 =
-    let
-        start =
-            fromTuple ( 2010, 10, 10, 10, 0, 0, 0 )
-
-        end =
-            fromTuple ( 2010, 10, 10, 10, 10, 0, 0 )
-    in
-    Activity 3 "hello" "https://theredlist.com/media/database/muses/icon/sport/cycling/030-cycling-theredlist.jpg" 120 [ LogEntry start end ]
+    Activity 3
+        "hello"
+        "https://theredlist.com/media/database/muses/icon/sport/cycling/030-cycling-theredlist.jpg"
+        120
+        [ LogEntry 0 (Just <| 10 * 60) ]
 
 
 initActivity4 : Activity
 initActivity4 =
-    let
-        start =
-            fromTuple ( 2010, 10, 10, 10, 0, 0, 0 )
-
-        end =
-            fromTuple ( 2010, 10, 10, 10, 10, 0, 0 )
-    in
-    Activity 4 "world" "https://i0.wp.com/www.flandersfamily.info/web/wp-content/uploads/2011/07/Chores.png" 60 [ LogEntry start end ]
+    Activity 4
+        "world"
+        "https://i0.wp.com/www.flandersfamily.info/web/wp-content/uploads/2011/07/Chores.png"
+        60
+        [ LogEntry 0 (Just <| 10 * 60) ]
 
 
 init : String -> Navigation.Location -> ( Model, Cmd Msg )
 init apiUrl location =
-    ( { location = Url.parsePath route location
+    ( { time = 0
+      , location = Url.parsePath route location
       , apiUrl = apiUrl
       , authenticatedData = AuthenticatedData "" "" ""
       , errorMessage = ""
@@ -312,7 +302,8 @@ init apiUrl location =
 
 
 type Msg
-    = NewUrl String
+    = Tick Time
+    | NewUrl String
     | UrlChange Navigation.Location
     | Authenticated AuthenticatedData
     | Mdl (Material.Msg Msg)
@@ -322,3 +313,4 @@ type Msg
     | ChangeActivitySlider Float
     | SaveActivityType
     | PostActivityResult (Result Http.Error ())
+    | StartActivity Int

@@ -16,8 +16,8 @@ import Material.Typography
 import Model exposing (Activity, Model, Msg)
 
 
-activityView : Activity -> Html Msg
-activityView activity =
+activityView : Model -> Activity -> Html Msg
+activityView model activity =
     Material.List.li [ Material.List.withSubtitle ]
         [ Material.List.content
             [ Material.Options.attribute <|
@@ -28,15 +28,15 @@ activityView activity =
             ]
             [ Material.List.avatarImage activity.imageUrl []
             , text activity.name
-            , Material.List.subtitle [] [ text <| Model.remainingString activity ++ " to do" ]
+            , Material.List.subtitle [] [ text <| Model.remainingString model activity ++ " to do" ]
             ]
-        , text <| Model.onScheduleRatioString activity
+        , text <| Model.onScheduleRatioString model activity
         ]
 
 
-activitiesView : List Activity -> Html Msg
-activitiesView activityList =
-    Material.List.ul [] <| List.map activityView activityList
+activitiesView : Model -> List Activity -> Html Msg
+activitiesView model activityList =
+    Material.List.ul [] <| List.map (activityView model) activityList
 
 
 editActivityView : Material.Model -> Model.ActivityEdit -> Html Msg
@@ -108,7 +108,7 @@ locationView model =
                     [ Grid.cell
                         [ Grid.size Grid.Tablet 8, Grid.size Grid.Desktop 6, Grid.offset Grid.Desktop 3 ]
                         [ Material.Options.styled Html.h4 [ Material.Typography.headline ] [ text "To do now" ]
-                        , Model.topActivities model.activities |> activitiesView
+                        , Model.topActivities model |> activitiesView model
                         ]
                     ]
                 ]
@@ -129,7 +129,7 @@ locationView model =
                     [ Grid.cell
                         [ Grid.size Grid.Tablet 8, Grid.size Grid.Desktop 6, Grid.offset Grid.Desktop 3 ]
                         [ Material.Options.styled Html.h4 [ Material.Typography.headline ] [ text "All your relentless activities" ]
-                        , Model.sortedActivities model.activities |> activitiesView
+                        , Model.sortedActivities model.activities |> activitiesView model
                         ]
                     ]
                 , div [ class "bottomright" ]
@@ -169,6 +169,15 @@ locationView model =
                         , Material.Options.styled p
                             [ Material.Typography.subhead ]
                             [ text <| activity.name ]
+                        , Material.Button.render Model.Mdl
+                            [ 0 ]
+                            model.mdl
+                            [ Material.Button.raised
+                            , Material.Button.colored
+                            , Material.Button.ripple
+                            , Material.Options.onClick (Model.StartActivity activity.id)
+                            ]
+                            [ text "Start activity" ]
                         ]
 
                 Nothing ->
