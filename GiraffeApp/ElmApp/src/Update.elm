@@ -4,6 +4,7 @@ import Http
 import Material
 import Model exposing (Model, Msg)
 import Navigation
+import Random
 import UrlParser as Url
 
 
@@ -50,11 +51,30 @@ update msg model =
             in
             ( { model | mdl = newMdl }, Navigation.newUrl url )
 
-        Model.UrlChange location ->
-            ( { model | location = Url.parsePath Model.route location }, Cmd.none )
+        Model.UrlChange path ->
+            let
+                location =
+                    Url.parsePath Model.route path
+
+                cmd =
+                    case location of
+                        Just Model.NewActivity ->
+                            Random.generate Model.NewActivityId (Random.int 0 Random.maxInt)
+
+                        _ ->
+                            Cmd.none
+            in
+            ( { model | location = location }, cmd )
 
         Model.Mdl mdlmsg ->
             Material.update Model.Mdl mdlmsg model
+
+        Model.NewActivityId id ->
+            let
+                activity =
+                    model.activityEdit.activity
+            in
+            ( { model | activityEdit = { activityEdit | activity = { activity | id = id } } }, Cmd.none )
 
         Model.ChangeActivityName name ->
             let

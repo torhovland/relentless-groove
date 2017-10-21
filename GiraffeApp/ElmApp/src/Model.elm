@@ -12,6 +12,7 @@ module Model
             , Decrement
             , Increment
             , Mdl
+            , NewActivityId
             , NewUrl
             , PostActivityResult
             , SaveActivityType
@@ -72,7 +73,8 @@ type alias LogEntry =
 
 
 type alias Activity =
-    { name : String
+    { id : Int
+    , name : String
     , imageUrl : String
     , minutesPerWeek : Int
     , log : List LogEntry
@@ -232,7 +234,7 @@ updatedActivity activityEdit =
 
 initActivity : Activity
 initActivity =
-    Activity "" "" 15 []
+    Activity -1 "" "" 15 []
 
 
 initActivityEdit : ActivityEdit
@@ -249,7 +251,7 @@ initActivity1 =
         end =
             fromTuple ( 2010, 10, 10, 10, 10, 0, 0 )
     in
-    Activity "foo" "http://www.contentwritingshop.co.uk/wp-content/uploads/content-writing-1200x800.jpg" 15 [ LogEntry start end ]
+    Activity 1 "foo" "http://www.contentwritingshop.co.uk/wp-content/uploads/content-writing-1200x800.jpg" 15 [ LogEntry start end ]
 
 
 initActivity2 : Activity
@@ -261,7 +263,7 @@ initActivity2 =
         end =
             fromTuple ( 2010, 10, 10, 10, 10, 0, 0 )
     in
-    Activity "bar" "https://www.passion4dancing.com/wp-content/uploads/2015/10/Dance-confidence.jpg" 30 [ LogEntry start end ]
+    Activity 2 "bar" "https://www.passion4dancing.com/wp-content/uploads/2015/10/Dance-confidence.jpg" 30 [ LogEntry start end ]
 
 
 initActivity3 : Activity
@@ -273,7 +275,7 @@ initActivity3 =
         end =
             fromTuple ( 2010, 10, 10, 10, 10, 0, 0 )
     in
-    Activity "hello" "https://theredlist.com/media/database/muses/icon/sport/cycling/030-cycling-theredlist.jpg" 120 [ LogEntry start end ]
+    Activity 3 "hello" "https://theredlist.com/media/database/muses/icon/sport/cycling/030-cycling-theredlist.jpg" 120 [ LogEntry start end ]
 
 
 initActivity4 : Activity
@@ -285,7 +287,7 @@ initActivity4 =
         end =
             fromTuple ( 2010, 10, 10, 10, 10, 0, 0 )
     in
-    Activity "world" "https://i0.wp.com/www.flandersfamily.info/web/wp-content/uploads/2011/07/Chores.png" 60 [ LogEntry start end ]
+    Activity 4 "world" "https://i0.wp.com/www.flandersfamily.info/web/wp-content/uploads/2011/07/Chores.png" 60 [ LogEntry start end ]
 
 
 init : String -> Navigation.Location -> ( Model, Cmd Msg )
@@ -308,6 +310,7 @@ type Msg
     | UrlChange Navigation.Location
     | Authenticated AuthenticatedData
     | Mdl (Material.Msg Msg)
+    | NewActivityId Int
     | ChangeActivityName String
     | ChangeActivityImage String
     | ChangeActivitySlider Float
