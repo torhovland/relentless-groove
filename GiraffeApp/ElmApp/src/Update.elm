@@ -106,12 +106,6 @@ update msg model =
             , postActivity model.apiUrl updatedActivity
             )
 
-        Model.Increment ->
-            ( { model | number = model.number + 1 }, Cmd.none )
-
-        Model.Decrement ->
-            ( { model | number = model.number - 1 }, Cmd.none )
-
         Model.PostActivityResult (Ok _) ->
             -- Not handling the results yet
             ( model, Cmd.none )

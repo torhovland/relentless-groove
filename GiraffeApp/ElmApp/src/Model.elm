@@ -9,8 +9,6 @@ module Model
             , ChangeActivityImage
             , ChangeActivityName
             , ChangeActivitySlider
-            , Decrement
-            , Increment
             , Mdl
             , NewActivityId
             , NewUrl
@@ -95,7 +93,6 @@ type alias Model =
     , mdl : Material.Model
     , activities : List Activity
     , activityEdit : ActivityEdit
-    , number : Int
     }
 
 
@@ -299,7 +296,6 @@ init apiUrl location =
       , mdl = Material.model
       , activities = [ initActivity1, initActivity2, initActivity3, initActivity4 ]
       , activityEdit = initActivityEdit
-      , number = 0
       }
     , Material.init Mdl
     )
@@ -315,6 +311,4 @@ type Msg
     | ChangeActivityImage String
     | ChangeActivitySlider Float
     | SaveActivityType
-    | Increment
-    | Decrement
     | PostActivityResult (Result Http.Error ())
