@@ -162,6 +162,10 @@ locationView model =
             in
             case maybeActivity of
                 Just activity ->
+                    let
+                        isActivityRunning =
+                            Model.isActivityRunning activity
+                    in
                     div []
                         [ Material.Options.styled p
                             [ Material.Typography.headline ]
@@ -175,9 +179,21 @@ locationView model =
                             [ Material.Button.raised
                             , Material.Button.colored
                             , Material.Button.ripple
-                            , Material.Options.onClick (Model.StartActivity activity.id)
+                            , Material.Options.onClick
+                                ((if isActivityRunning then
+                                    Model.StopActivity
+                                  else
+                                    Model.StartActivity
+                                 )
+                                    activity.id
+                                )
                             ]
-                            [ text "Start activity" ]
+                            [ text <|
+                                if isActivityRunning then
+                                    "Stop activity"
+                                else
+                                    "Start activity"
+                            ]
                         ]
 
                 Nothing ->

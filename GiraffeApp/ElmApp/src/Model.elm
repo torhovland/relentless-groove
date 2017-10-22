@@ -16,6 +16,7 @@ module Model
             , PostActivityResult
             , SaveActivityType
             , StartActivity
+            , StopActivity
             , Tick
             , UrlChange
             )
@@ -25,6 +26,7 @@ module Model
         , init
         , initActivity
         , initActivityEdit
+        , isActivityRunning
         , minutesPerWeek
         , onScheduleRatioString
         , remainingString
@@ -155,6 +157,14 @@ sortedActivities =
             compare a.name b.name
     in
     List.sortWith lexicalSort
+
+
+isActivityRunning : Activity -> Bool
+isActivityRunning activity =
+    activity.log
+        |> List.filter (\l -> l.end == Nothing)
+        |> List.isEmpty
+        |> not
 
 
 toMinutes : Time -> Int
@@ -314,3 +324,4 @@ type Msg
     | SaveActivityType
     | PostActivityResult (Result Http.Error ())
     | StartActivity Int
+    | StopActivity Int

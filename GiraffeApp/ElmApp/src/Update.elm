@@ -140,3 +140,31 @@ update msg model =
               }
             , Cmd.none
             )
+
+        Model.StopActivity id ->
+            let
+                activity =
+                    Model.activityById id model.activities
+
+                updateEnd logEntry =
+                    if logEntry.end == Nothing then
+                        { logEntry | end = Just model.time }
+                    else
+                        logEntry
+
+                updatedActivities =
+                    List.map
+                        (\a ->
+                            if a.id == id then
+                                { a | log = List.map updateEnd a.log }
+                            else
+                                a
+                        )
+                        model.activities
+            in
+            ( { model
+                | activities = updatedActivities
+                , location = Just Model.Activities
+              }
+            , Cmd.none
+            )
