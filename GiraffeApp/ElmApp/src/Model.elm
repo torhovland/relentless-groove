@@ -256,7 +256,7 @@ initActivity1 =
         "foo"
         "http://www.contentwritingshop.co.uk/wp-content/uploads/content-writing-1200x800.jpg"
         15
-        [ LogEntry 0 (Just <| 10 * 60) ]
+        [ LogEntry 0 (Just <| 10 * 60 * 1000) ]
 
 
 initActivity2 : Activity
@@ -265,7 +265,7 @@ initActivity2 =
         "bar"
         "https://www.passion4dancing.com/wp-content/uploads/2015/10/Dance-confidence.jpg"
         30
-        [ LogEntry 0 (Just <| 10 * 60) ]
+        [ LogEntry 0 (Just <| 10 * 60 * 1000) ]
 
 
 initActivity3 : Activity
@@ -274,7 +274,7 @@ initActivity3 =
         "hello"
         "https://theredlist.com/media/database/muses/icon/sport/cycling/030-cycling-theredlist.jpg"
         120
-        [ LogEntry 0 (Just <| 10 * 60) ]
+        [ LogEntry 0 (Just <| 10 * 60 * 1000) ]
 
 
 initActivity4 : Activity
@@ -283,7 +283,7 @@ initActivity4 =
         "world"
         "https://i0.wp.com/www.flandersfamily.info/web/wp-content/uploads/2011/07/Chores.png"
         60
-        [ LogEntry 0 (Just <| 10 * 60) ]
+        [ LogEntry 0 (Just <| 10 * 60 * 1000) ]
 
 
 init : String -> Navigation.Location -> ( Model, Cmd Msg )
