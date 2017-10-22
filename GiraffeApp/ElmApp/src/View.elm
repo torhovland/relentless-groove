@@ -2,14 +2,15 @@ module View exposing (view)
 
 import Html exposing (Html, div, header, img, p, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class, id, src)
-import Html.Events exposing (onClick)
 import Material
 import Material.Button
+import Material.Card as Card
+import Material.Elevation
 import Material.Grid as Grid
 import Material.Icon
 import Material.Layout
-import Material.List
 import Material.Options
+import Material.Progress
 import Material.Slider
 import Material.Textfield
 import Material.Typography
@@ -18,35 +19,49 @@ import Model exposing (Activity, Model, Msg)
 
 activityView : Model -> Activity -> Html Msg
 activityView model activity =
-    Material.List.li [ Material.List.withSubtitle ]
-        [ Material.List.content
-            [ Material.Options.attribute <|
-                Html.Events.onClick <|
-                    Model.NewUrl <|
-                        "/log-activity/"
-                            ++ toString activity.id
+    Card.view
+        [ Material.Options.css "margin" "1em"
+        , Material.Options.css "width" "100%"
+        , Material.Elevation.e2
+        ]
+        [ Card.title
+            [ Material.Options.css "align-content" "flex-start"
+            , Material.Options.css "flex-direction" "row"
+            , Material.Options.css "align-items" "flex-start"
+            , Material.Options.css "justify-content" "space-between"
             ]
-            [ Material.List.avatarImage activity.imageUrl []
-            , text activity.name
-            , Material.List.subtitle [] [ text <| Model.remainingString model activity ++ " to do" ]
+            [ Material.Options.div []
+                [ Card.head [] [ text activity.name ]
+                , Card.subhead [] [ text <| Model.remainingString model activity ++ " to do" ]
+                ]
+            , Material.Options.img
+                [ Material.Options.attribute <| Html.Attributes.src activity.imageUrl
+                , Material.Options.css "width" "5em"
+                ]
+                []
             ]
-        , text <| Model.onScheduleRatioString model activity
+        , Card.text []
+            [ Material.Options.styled p
+                [ Material.Typography.headline ]
+                [ text <| Model.onScheduleRatioString model activity ++ " on schedule" ]
+            , Material.Progress.progress <| 100 * Model.onScheduleRatio model activity
+            ]
         ]
 
 
 activitiesView : Model -> List Activity -> Html Msg
-activitiesView model activityList =
-    Material.List.ul [] <| List.map (activityView model) activityList
+activitiesView model =
+    List.map (activityView model) >> Material.Options.div []
 
 
 editActivityView : Material.Model -> Model.ActivityEdit -> Html Msg
 editActivityView mdl activityEdit =
     div []
         [ div []
-            [ Material.Options.styled p
+            [ Material.Options.styled Html.h1
                 [ Material.Typography.headline ]
                 [ text "New activity type" ]
-            , Material.Options.styled p
+            , Material.Options.styled Html.h2
                 [ Material.Typography.title ]
                 [ text "Activity details" ]
             , Material.Textfield.render Model.Mdl
@@ -71,7 +86,7 @@ editActivityView mdl activityEdit =
                 []
             ]
         , div []
-            [ Material.Options.styled p
+            [ Material.Options.styled Html.h2
                 [ Material.Typography.title ]
                 [ text "Relentlessness of the activity" ]
             , Material.Slider.view
@@ -104,33 +119,38 @@ locationView model =
     case model.location of
         Just Model.Home ->
             div []
-                [ Grid.grid []
+                [ Material.Options.styled Html.h1
+                    [ Material.Typography.headline ]
+                    [ text "To do today" ]
+                , Material.Options.styled Html.h2
+                    [ Material.Typography.subhead ]
+                    [ text "Choose one of these now" ]
+                , Grid.grid []
                     [ Grid.cell
                         [ Grid.size Grid.Tablet 8, Grid.size Grid.Desktop 6, Grid.offset Grid.Desktop 3 ]
-                        [ Material.Options.styled Html.h4 [ Material.Typography.headline ] [ text "To do now" ]
-                        , Model.topActivities model |> activitiesView model
-                        ]
+                        [ Model.topActivities model |> activitiesView model ]
                     ]
                 ]
 
         Just Model.Tomorrow ->
             div []
-                [ Material.Options.styled p
+                [ Material.Options.styled Html.h1
                     [ Material.Typography.headline ]
                     [ text "To do tomorrow" ]
-                , Material.Options.styled p
+                , Material.Options.styled Html.h2
                     [ Material.Typography.subhead ]
                     [ text "Unless you do some of it today" ]
                 ]
 
         Just Model.Activities ->
             div [ class "fullpage" ]
-                [ Grid.grid []
+                [ Material.Options.styled Html.h1
+                    [ Material.Typography.headline ]
+                    [ text "All your relentless activities" ]
+                , Grid.grid []
                     [ Grid.cell
                         [ Grid.size Grid.Tablet 8, Grid.size Grid.Desktop 6, Grid.offset Grid.Desktop 3 ]
-                        [ Material.Options.styled Html.h4 [ Material.Typography.headline ] [ text "All your relentless activities" ]
-                        , Model.sortedActivities model.activities |> activitiesView model
-                        ]
+                        [ Model.sortedActivities model.activities |> activitiesView model ]
                     ]
                 , div [ class "bottomright" ]
                     [ Material.Button.render Model.Mdl
@@ -147,7 +167,7 @@ locationView model =
 
         Just Model.Log ->
             div []
-                [ Material.Options.styled p
+                [ Material.Options.styled Html.h1
                     [ Material.Typography.headline ]
                     [ text "Activity log" ]
                 ]

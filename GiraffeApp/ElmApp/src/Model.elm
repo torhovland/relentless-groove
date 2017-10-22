@@ -28,6 +28,7 @@ module Model
         , initActivityEdit
         , isActivityRunning
         , minutesPerWeek
+        , onScheduleRatio
         , onScheduleRatioString
         , remainingString
         , route
