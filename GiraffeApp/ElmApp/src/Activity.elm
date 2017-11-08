@@ -1,9 +1,11 @@
 module Activity
     exposing
         ( Activity
+        , ActivityEdit
         , byId
         , initActivities
         , isRunning
+        , minutesPerWeek
         , onScheduleRatio
         , remaining
         , sorted
@@ -27,6 +29,12 @@ type alias Activity =
     , imageUrl : String
     , minutesPerWeek : Int
     , log : List LogEntry
+    }
+
+
+type alias ActivityEdit =
+    { activity : Activity
+    , sliderValue : Int
     }
 
 
@@ -119,6 +127,20 @@ activityGoal activity =
 onScheduleRatio : Time -> Activity -> Float
 onScheduleRatio time activity =
     loggedTime time activity / activityGoal activity
+
+
+minutesPerWeek : ActivityEdit -> Int
+minutesPerWeek activity =
+    let
+        slider =
+            activity.sliderValue
+    in
+    if slider <= 12 then
+        slider * 5
+    else if slider <= 20 then
+        12 * 5 + (slider - 12) * 15
+    else
+        12 * 5 + 8 * 15 + (slider - 20) * 30
 
 
 initActivity1 : Activity
