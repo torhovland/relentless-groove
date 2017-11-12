@@ -1,37 +1,76 @@
 port module Main exposing (main)
 
 import Activity exposing (Activity, ActivityEdit, minutesPerWeek)
+import Html exposing (Html, div)
+import Html.Attributes exposing (class)
 import Http
 import Material
-import Model
-    exposing
-        ( AuthenticatedData
-        , Model
-        , Msg
-            ( Authenticated
-            , ChangeActivityImage
-            , ChangeActivityName
-            , ChangeActivitySlider
-            , Mdl
-            , NewActivityId
-            , NewUrl
-            , PostActivityResult
-            , SaveActivityType
-            , StartActivity
-            , StopActivity
-            , Tick
-            , UrlChange
-            )
-        , Route(Activities, Home, Log, LogActivity, NewActivity, Tomorrow)
-        )
+import Material.Layout
 import Navigation
 import Random
-import Time
+import Time exposing (Time)
 import UrlParser as Url exposing ((</>))
 import View
 
 
 port authenticated : (AuthenticatedData -> msg) -> Sub msg
+
+
+type Route
+    = Home
+    | Tomorrow
+    | Log
+    | Activities
+    | NewActivity
+    | LogActivity Int
+
+
+type alias AuthenticatedData =
+    { name : String
+    , image_url : String
+    , id_token : String
+    }
+
+
+type alias Model =
+    { time : Time
+    , location : Maybe Route
+    , apiUrl : String
+    , authenticatedData : AuthenticatedData
+    , errorMessage : String
+    , mdl : Material.Model
+    , activities : List Activity
+    , activityEdit : ActivityEdit
+    }
+
+
+type Msg
+    = Tick Time
+    | Authenticated AuthenticatedData
+    | Mdl (Material.Msg Msg)
+    | NewUrl String
+    | UrlChange Navigation.Location
+    | NewActivityId Int
+    | ChangeActivityName String
+    | ChangeActivityImage String
+    | ChangeActivitySlider Float
+    | SaveActivityType
+    | PostActivityResult (Result Http.Error ())
+    | StartActivity Int
+    | StopActivity Int
+
+
+viewMessages : View.ViewMessages Msg
+viewMessages =
+    { materialMsgHandler = Mdl
+    , newUrlHandler = NewUrl
+    , changeActivityNameHandler = ChangeActivityName
+    , changeActivityImageHandler = ChangeActivityImage
+    , changeActivitySliderHandler = ChangeActivitySlider
+    , saveActivityTypeHandler = SaveActivityType
+    , startActivityHandler = StartActivity
+    , stopActivityHandler = StopActivity
+    }
 
 
 route : Url.Parser (Route -> a) a
@@ -141,15 +180,15 @@ update msg model =
             in
             ( { model | location = location }, cmd )
 
-        Mdl mdlmsg ->
-            Material.update Mdl mdlmsg model
+        Mdl materialMsg ->
+            Material.update Mdl materialMsg model
 
-        NewActivityId id ->
+        NewActivityId activityId ->
             let
                 activity =
                     model.activityEdit.activity
             in
-            ( { model | activityEdit = { activityEdit | activity = { activity | id = id } } }, Cmd.none )
+            ( { model | activityEdit = { activityEdit | activity = { activity | id = activityId } } }, Cmd.none )
 
         ChangeActivityName name ->
             let
@@ -191,21 +230,81 @@ update msg model =
         Authenticated data ->
             ( { model | authenticatedData = data }, Cmd.none )
 
-        StartActivity id ->
+        StartActivity activityId ->
             ( { model
-                | activities = model.activities |> Activity.start id model.time
+                | activities = model.activities |> Activity.start activityId model.time
                 , location = Just Activities
               }
             , Cmd.none
             )
 
-        StopActivity id ->
+        StopActivity activityId ->
             ( { model
-                | activities = model.activities |> Activity.stop id model.time
+                | activities = model.activities |> Activity.stop activityId model.time
                 , location = Just Activities
               }
             , Cmd.none
             )
+
+
+locationView : Model -> Html Msg
+locationView model =
+    case model.location of
+        Just Home ->
+            View.homePageView model.time (model.activities |> Activity.top model.time)
+
+        Just Tomorrow ->
+            View.tomorrowPageView
+
+        Just Activities ->
+            View.activitiesPageView
+                viewMessages
+                model.mdl
+                model.time
+                model.activities
+
+        Just Log ->
+            View.logPageView
+
+        Just NewActivity ->
+            View.editActivityPageView
+                viewMessages
+                model.mdl
+                model.activityEdit
+
+        Just (LogActivity activityId) ->
+            case Activity.byId activityId model.activities of
+                Just activity ->
+                    View.logActivityPageView viewMessages model.mdl activity
+
+                Nothing ->
+                    View.unknownActivityPageView
+
+        Nothing ->
+            View.unknownPageView
+
+
+view : Model -> Html Msg
+view model =
+    let
+        auth =
+            model.authenticatedData
+    in
+    Material.Layout.render Mdl
+        model.mdl
+        [ Material.Layout.fixedHeader
+        , Material.Layout.fixedDrawer
+        ]
+        { header = [ View.pageHeader ]
+        , drawer = View.drawer viewMessages auth.name auth.image_url
+        , tabs = ( [], [] )
+        , main =
+            [ div [ class "body-container fullpage" ]
+                [ View.signinView <| auth.id_token == ""
+                , locationView model
+                ]
+            ]
+        }
 
 
 subscriptions : Model -> Sub Msg
@@ -221,7 +320,7 @@ main : Program String Model Msg
 main =
     Navigation.programWithFlags UrlChange
         { init = init
-        , view = View.view
+        , view = view
         , update = update
         , subscriptions = subscriptions
         }

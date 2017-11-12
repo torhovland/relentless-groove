@@ -1,4 +1,18 @@
-module View exposing (view)
+module View
+    exposing
+        ( ViewMessages
+        , activitiesPageView
+        , drawer
+        , editActivityPageView
+        , homePageView
+        , logActivityPageView
+        , logPageView
+        , pageHeader
+        , signinView
+        , tomorrowPageView
+        , unknownActivityPageView
+        , unknownPageView
+        )
 
 import Activity exposing (Activity, ActivityEdit)
 import Html exposing (Html, div, header, img, p, text)
@@ -15,24 +29,20 @@ import Material.Progress
 import Material.Slider
 import Material.Textfield
 import Material.Typography
-import Model
-    exposing
-        ( AuthenticatedData
-        , Model
-        , Msg
-            ( ChangeActivityImage
-            , ChangeActivityName
-            , ChangeActivitySlider
-            , Mdl
-            , NewUrl
-            , SaveActivityType
-            , StartActivity
-            , StopActivity
-            )
-        , Route(Activities, Home, Log, LogActivity, NewActivity, Tomorrow)
-        )
 import Numeral
 import Time exposing (Time)
+
+
+type alias ViewMessages message =
+    { materialMsgHandler : Material.Msg message -> message
+    , changeActivityNameHandler : String -> message
+    , changeActivityImageHandler : String -> message
+    , changeActivitySliderHandler : Float -> message
+    , newUrlHandler : String -> message
+    , saveActivityTypeHandler : message
+    , startActivityHandler : Int -> message
+    , stopActivityHandler : Int -> message
+    }
 
 
 formatMinutes : Int -> String
@@ -122,13 +132,76 @@ activityView time activity =
         ]
 
 
-activitiesView : Model -> List Activity -> Html Msg
-activitiesView model =
-    List.map (activityView model.time) >> Material.Options.div []
+activitiesView : Time -> List Activity -> Html msg
+activitiesView time =
+    List.map (activityView time) >> Material.Options.div []
 
 
-editActivityView : Material.Model -> ActivityEdit -> Html Msg
-editActivityView mdl activityEdit =
+homePageView : Time -> List Activity -> Html msg
+homePageView time activities =
+    div []
+        [ Material.Options.styled Html.h1
+            [ Material.Typography.headline ]
+            [ text "To do today" ]
+        , Material.Options.styled Html.h2
+            [ Material.Typography.subhead ]
+            [ text "Choose one of these now" ]
+        , Grid.grid []
+            [ Grid.cell
+                [ Grid.size Grid.Tablet 8, Grid.size Grid.Desktop 6, Grid.offset Grid.Desktop 3 ]
+                [ activities |> activitiesView time ]
+            ]
+        ]
+
+
+tomorrowPageView : Html msg
+tomorrowPageView =
+    div []
+        [ Material.Options.styled Html.h1
+            [ Material.Typography.headline ]
+            [ text "To do tomorrow" ]
+        , Material.Options.styled Html.h2
+            [ Material.Typography.subhead ]
+            [ text "Unless you do some of it today" ]
+        ]
+
+
+activitiesPageView : ViewMessages msg -> Material.Model -> Time -> List Activity -> Html msg
+activitiesPageView messages mdl time activities =
+    div [ class "fullpage" ]
+        [ Material.Options.styled Html.h1
+            [ Material.Typography.headline ]
+            [ text "All your relentless activities" ]
+        , Grid.grid []
+            [ Grid.cell
+                [ Grid.size Grid.Tablet 8, Grid.size Grid.Desktop 6, Grid.offset Grid.Desktop 3 ]
+                [ activities |> Activity.sorted |> activitiesView time ]
+            ]
+        , div [ class "bottomright" ]
+            [ Material.Button.render messages.materialMsgHandler
+                [ 0 ]
+                mdl
+                [ Material.Button.fab
+                , Material.Button.colored
+                , Material.Button.ripple
+                , Material.Options.onClick <| messages.newUrlHandler "/new-activity"
+                ]
+                [ Material.Icon.i "add" ]
+            ]
+        ]
+
+
+logPageView : Html msg
+logPageView =
+    div []
+        [ Material.Options.styled Html.h1
+            [ Material.Typography.headline ]
+            [ text "Activity log" ]
+        ]
+
+
+editActivityPageView : ViewMessages message -> Material.Model -> ActivityEdit -> Html message
+editActivityPageView messages mdl activityEdit =
     div []
         [ div []
             [ Material.Options.styled Html.h1
@@ -137,24 +210,24 @@ editActivityView mdl activityEdit =
             , Material.Options.styled Html.h2
                 [ Material.Typography.title ]
                 [ text "Activity details" ]
-            , Material.Textfield.render Mdl
+            , Material.Textfield.render messages.materialMsgHandler
                 [ 0 ]
                 mdl
                 [ Material.Textfield.label "Name of activity type"
                 , Material.Textfield.floatingLabel
                 , Material.Textfield.value activityEdit.activity.name
-                , Material.Options.onInput ChangeActivityName
+                , Material.Options.onInput messages.changeActivityNameHandler
                 ]
                 []
             ]
         , div []
-            [ Material.Textfield.render Mdl
+            [ Material.Textfield.render messages.materialMsgHandler
                 [ 0 ]
                 mdl
                 [ Material.Textfield.label "URL to activity icon"
                 , Material.Textfield.floatingLabel
                 , Material.Textfield.value activityEdit.activity.imageUrl
-                , Material.Options.onInput ChangeActivityImage
+                , Material.Options.onInput messages.changeActivityImageHandler
                 ]
                 []
             ]
@@ -163,7 +236,7 @@ editActivityView mdl activityEdit =
                 [ Material.Typography.title ]
                 [ text "Relentlessness of the activity" ]
             , Material.Slider.view
-                [ Material.Slider.onChange ChangeActivitySlider
+                [ Material.Slider.onChange messages.changeActivitySliderHandler
                 , Material.Slider.value <| toFloat activityEdit.sliderValue
                 , Material.Slider.max 34
                 , Material.Slider.min 1
@@ -174,141 +247,69 @@ editActivityView mdl activityEdit =
                 [ text <| formatMinutes (Activity.minutesPerWeek activityEdit) ++ " per week." ]
             ]
         , div []
-            [ Material.Button.render Mdl
+            [ Material.Button.render messages.materialMsgHandler
                 [ 0 ]
                 mdl
                 [ Material.Button.raised
                 , Material.Button.colored
                 , Material.Button.ripple
-                , Material.Options.onClick SaveActivityType
+                , Material.Options.onClick messages.saveActivityTypeHandler
                 ]
                 [ text "Save activity type" ]
             ]
         ]
 
 
-locationView : Model -> Html Msg
-locationView model =
-    case model.location of
-        Just Home ->
-            div []
-                [ Material.Options.styled Html.h1
-                    [ Material.Typography.headline ]
-                    [ text "To do today" ]
-                , Material.Options.styled Html.h2
-                    [ Material.Typography.subhead ]
-                    [ text "Choose one of these now" ]
-                , Grid.grid []
-                    [ Grid.cell
-                        [ Grid.size Grid.Tablet 8, Grid.size Grid.Desktop 6, Grid.offset Grid.Desktop 3 ]
-                        [ model.activities |> Activity.top model.time |> activitiesView model ]
-                    ]
-                ]
-
-        Just Tomorrow ->
-            div []
-                [ Material.Options.styled Html.h1
-                    [ Material.Typography.headline ]
-                    [ text "To do tomorrow" ]
-                , Material.Options.styled Html.h2
-                    [ Material.Typography.subhead ]
-                    [ text "Unless you do some of it today" ]
-                ]
-
-        Just Activities ->
-            div [ class "fullpage" ]
-                [ Material.Options.styled Html.h1
-                    [ Material.Typography.headline ]
-                    [ text "All your relentless activities" ]
-                , Grid.grid []
-                    [ Grid.cell
-                        [ Grid.size Grid.Tablet 8, Grid.size Grid.Desktop 6, Grid.offset Grid.Desktop 3 ]
-                        [ model.activities |> Activity.sorted |> activitiesView model ]
-                    ]
-                , div [ class "bottomright" ]
-                    [ Material.Button.render Mdl
-                        [ 0 ]
-                        model.mdl
-                        [ Material.Button.fab
-                        , Material.Button.colored
-                        , Material.Button.ripple
-                        , Material.Options.onClick <| NewUrl "/new-activity"
-                        ]
-                        [ Material.Icon.i "add" ]
-                    ]
-                ]
-
-        Just Log ->
-            div []
-                [ Material.Options.styled Html.h1
-                    [ Material.Typography.headline ]
-                    [ text "Activity log" ]
-                ]
-
-        Just NewActivity ->
-            editActivityView model.mdl model.activityEdit
-
-        Just (LogActivity activityId) ->
-            case Activity.byId activityId model.activities of
-                Just activity ->
-                    let
-                        isRunning =
-                            Activity.isRunning activity
-                    in
-                    div []
-                        [ Material.Options.styled p
-                            [ Material.Typography.headline ]
-                            [ text "Log time on activity" ]
-                        , Material.Options.styled p
-                            [ Material.Typography.subhead ]
-                            [ text <| activity.name ]
-                        , Material.Button.render Mdl
-                            [ 0 ]
-                            model.mdl
-                            [ Material.Button.raised
-                            , Material.Button.colored
-                            , Material.Button.ripple
-                            , Material.Options.onClick <|
-                                if isRunning then
-                                    StopActivity activity.id
-                                else
-                                    StartActivity activity.id
-                            ]
-                            [ text <|
-                                if isRunning then
-                                    "Stop activity"
-                                else
-                                    "Start activity"
-                            ]
-                        ]
-
-                Nothing ->
-                    div []
-                        [ Material.Options.styled p
-                            [ Material.Typography.headline ]
-                            [ text "Unknown activity id" ]
-                        ]
-
-        Nothing ->
-            div []
-                [ Material.Options.styled p
-                    [ Material.Typography.headline ]
-                    [ text "Unknown page" ]
-                ]
-
-
-view : Model -> Html Msg
-view model =
-    Material.Layout.render Mdl
-        model.mdl
-        [ Material.Layout.fixedHeader
-        , Material.Layout.fixedDrawer
+logActivityPageView : ViewMessages message -> Material.Model -> Activity -> Html message
+logActivityPageView messages mdl activity =
+    let
+        isRunning =
+            Activity.isRunning activity
+    in
+    div []
+        [ Material.Options.styled p
+            [ Material.Typography.headline ]
+            [ text "Log time on activity" ]
+        , Material.Options.styled p
+            [ Material.Typography.subhead ]
+            [ text <| activity.name ]
+        , Material.Button.render messages.materialMsgHandler
+            [ 0 ]
+            mdl
+            [ Material.Button.raised
+            , Material.Button.colored
+            , Material.Button.ripple
+            , Material.Options.onClick <|
+                if isRunning then
+                    messages.stopActivityHandler activity.id
+                else
+                    messages.startActivityHandler activity.id
+            ]
+            [ text <|
+                if isRunning then
+                    "Stop activity"
+                else
+                    "Start activity"
+            ]
         ]
-        { header = [ pageHeader ]
-        , drawer = drawer model.authenticatedData
-        , tabs = ( [], [] )
-        , main = [ viewBody model ]
-        }
+
+
+unknownActivityPageView : Html msg
+unknownActivityPageView =
+    div []
+        [ Material.Options.styled p
+            [ Material.Typography.headline ]
+            [ text "Unknown activity id" ]
+        ]
+
+
+unknownPageView : Html msg
+unknownPageView =
+    div []
+        [ Material.Options.styled p
+            [ Material.Typography.headline ]
+            [ text "Unknown page" ]
+        ]
 
 
 pageHeader : Html msg
@@ -319,49 +320,41 @@ pageHeader =
         ]
 
 
-drawer : AuthenticatedData -> List (Html Msg)
-drawer authenticatedData =
+drawer : ViewMessages message -> String -> String -> List (Html message)
+drawer messages userName userImageUrl =
     [ header [ class "drawer-header" ]
-        [ img [ class "avatar", src authenticatedData.image_url ] []
-        , div [ class "name" ] [ text authenticatedData.name ]
+        [ img [ class "avatar", src userImageUrl ] []
+        , div [ class "name" ] [ text userName ]
         ]
     , Material.Layout.navigation
         []
         [ Material.Layout.link
-            [ Material.Options.onClick <| NewUrl "/" ]
+            [ Material.Options.onClick <| messages.newUrlHandler "/" ]
             [ text "Today" ]
         , Material.Layout.link
-            [ Material.Options.onClick <| NewUrl "/tomorrow" ]
+            [ Material.Options.onClick <| messages.newUrlHandler "/tomorrow" ]
             [ text "Tomorrow" ]
         , Material.Layout.link
-            [ Material.Options.onClick <| NewUrl "/log" ]
+            [ Material.Options.onClick <| messages.newUrlHandler "/log" ]
             [ text "Log" ]
         , Material.Layout.link
-            [ Material.Options.onClick <| NewUrl "/activities" ]
+            [ Material.Options.onClick <| messages.newUrlHandler "/activities" ]
             [ text "Activities" ]
         , Material.Layout.link
-            [ Material.Options.onClick <| NewUrl "/new-activity" ]
+            [ Material.Options.onClick <| messages.newUrlHandler "/new-activity" ]
             [ text "New activity type" ]
         ]
     ]
 
 
-signinView : AuthenticatedData -> Html msg
-signinView authenticatedData =
+signinView : Bool -> Html msg
+signinView isVisible =
     div
         [ id "my-signin2"
         , class <|
-            if authenticatedData.id_token == "" then
+            if isVisible then
                 "visible"
             else
                 "invisible"
         ]
         []
-
-
-viewBody : Model -> Html Msg
-viewBody model =
-    div [ class "body-container fullpage" ]
-        [ signinView model.authenticatedData
-        , locationView model
-        ]
