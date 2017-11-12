@@ -1,7 +1,6 @@
 module View
     exposing
-        ( ViewMessages
-        , activitiesPageView
+        ( activitiesPageView
         , drawer
         , editActivityPageView
         , homePageView
@@ -31,18 +30,6 @@ import Material.Textfield
 import Material.Typography
 import Numeral
 import Time exposing (Time)
-
-
-type alias ViewMessages message =
-    { materialMsgHandler : Material.Msg message -> message
-    , changeActivityNameHandler : String -> message
-    , changeActivityImageHandler : String -> message
-    , changeActivitySliderHandler : Float -> message
-    , newUrlHandler : String -> message
-    , saveActivityTypeHandler : message
-    , startActivityHandler : Int -> message
-    , stopActivityHandler : Int -> message
-    }
 
 
 formatMinutes : Int -> String
@@ -166,8 +153,14 @@ tomorrowPageView =
         ]
 
 
-activitiesPageView : ViewMessages msg -> Material.Model -> Time -> List Activity -> Html msg
-activitiesPageView messages mdl time activities =
+activitiesPageView :
+    (Material.Msg msg -> msg)
+    -> (String -> msg)
+    -> Material.Model
+    -> Time
+    -> List Activity
+    -> Html msg
+activitiesPageView materialMsg newUrl mdl time activities =
     div [ class "fullpage" ]
         [ Material.Options.styled Html.h1
             [ Material.Typography.headline ]
@@ -178,13 +171,13 @@ activitiesPageView messages mdl time activities =
                 [ activities |> Activity.sorted |> activitiesView time ]
             ]
         , div [ class "bottomright" ]
-            [ Material.Button.render messages.materialMsgHandler
+            [ Material.Button.render materialMsg
                 [ 0 ]
                 mdl
                 [ Material.Button.fab
                 , Material.Button.colored
                 , Material.Button.ripple
-                , Material.Options.onClick <| messages.newUrlHandler "/new-activity"
+                , Material.Options.onClick <| newUrl "/new-activity"
                 ]
                 [ Material.Icon.i "add" ]
             ]
@@ -200,8 +193,16 @@ logPageView =
         ]
 
 
-editActivityPageView : ViewMessages message -> Material.Model -> ActivityEdit -> Html message
-editActivityPageView messages mdl activityEdit =
+editActivityPageView :
+    (Material.Msg msg -> msg)
+    -> (String -> msg)
+    -> (String -> msg)
+    -> (Float -> msg)
+    -> msg
+    -> Material.Model
+    -> ActivityEdit
+    -> Html msg
+editActivityPageView materialMsg changeActivityName changeActivityImage changeActivitySlider saveActivityType mdl activityEdit =
     div []
         [ div []
             [ Material.Options.styled Html.h1
@@ -210,24 +211,24 @@ editActivityPageView messages mdl activityEdit =
             , Material.Options.styled Html.h2
                 [ Material.Typography.title ]
                 [ text "Activity details" ]
-            , Material.Textfield.render messages.materialMsgHandler
+            , Material.Textfield.render materialMsg
                 [ 0 ]
                 mdl
                 [ Material.Textfield.label "Name of activity type"
                 , Material.Textfield.floatingLabel
                 , Material.Textfield.value activityEdit.activity.name
-                , Material.Options.onInput messages.changeActivityNameHandler
+                , Material.Options.onInput changeActivityName
                 ]
                 []
             ]
         , div []
-            [ Material.Textfield.render messages.materialMsgHandler
+            [ Material.Textfield.render materialMsg
                 [ 0 ]
                 mdl
                 [ Material.Textfield.label "URL to activity icon"
                 , Material.Textfield.floatingLabel
                 , Material.Textfield.value activityEdit.activity.imageUrl
-                , Material.Options.onInput messages.changeActivityImageHandler
+                , Material.Options.onInput changeActivityImage
                 ]
                 []
             ]
@@ -236,7 +237,7 @@ editActivityPageView messages mdl activityEdit =
                 [ Material.Typography.title ]
                 [ text "Relentlessness of the activity" ]
             , Material.Slider.view
-                [ Material.Slider.onChange messages.changeActivitySliderHandler
+                [ Material.Slider.onChange changeActivitySlider
                 , Material.Slider.value <| toFloat activityEdit.sliderValue
                 , Material.Slider.max 34
                 , Material.Slider.min 1
@@ -247,21 +248,27 @@ editActivityPageView messages mdl activityEdit =
                 [ text <| formatMinutes (Activity.minutesPerWeek activityEdit) ++ " per week." ]
             ]
         , div []
-            [ Material.Button.render messages.materialMsgHandler
+            [ Material.Button.render materialMsg
                 [ 0 ]
                 mdl
                 [ Material.Button.raised
                 , Material.Button.colored
                 , Material.Button.ripple
-                , Material.Options.onClick messages.saveActivityTypeHandler
+                , Material.Options.onClick saveActivityType
                 ]
                 [ text "Save activity type" ]
             ]
         ]
 
 
-logActivityPageView : ViewMessages message -> Material.Model -> Activity -> Html message
-logActivityPageView messages mdl activity =
+logActivityPageView :
+    (Material.Msg msg -> msg)
+    -> (Int -> msg)
+    -> (Int -> msg)
+    -> Material.Model
+    -> Activity
+    -> Html msg
+logActivityPageView materialMsg startActivity stopActivity mdl activity =
     let
         isRunning =
             Activity.isRunning activity
@@ -273,7 +280,7 @@ logActivityPageView messages mdl activity =
         , Material.Options.styled p
             [ Material.Typography.subhead ]
             [ text <| activity.name ]
-        , Material.Button.render messages.materialMsgHandler
+        , Material.Button.render materialMsg
             [ 0 ]
             mdl
             [ Material.Button.raised
@@ -281,9 +288,9 @@ logActivityPageView messages mdl activity =
             , Material.Button.ripple
             , Material.Options.onClick <|
                 if isRunning then
-                    messages.stopActivityHandler activity.id
+                    stopActivity activity.id
                 else
-                    messages.startActivityHandler activity.id
+                    startActivity activity.id
             ]
             [ text <|
                 if isRunning then
@@ -320,8 +327,8 @@ pageHeader =
         ]
 
 
-drawer : ViewMessages message -> String -> String -> List (Html message)
-drawer messages userName userImageUrl =
+drawer : (String -> msg) -> String -> String -> List (Html msg)
+drawer newUrl userName userImageUrl =
     [ header [ class "drawer-header" ]
         [ img [ class "avatar", src userImageUrl ] []
         , div [ class "name" ] [ text userName ]
@@ -329,19 +336,19 @@ drawer messages userName userImageUrl =
     , Material.Layout.navigation
         []
         [ Material.Layout.link
-            [ Material.Options.onClick <| messages.newUrlHandler "/" ]
+            [ Material.Options.onClick <| newUrl "/" ]
             [ text "Today" ]
         , Material.Layout.link
-            [ Material.Options.onClick <| messages.newUrlHandler "/tomorrow" ]
+            [ Material.Options.onClick <| newUrl "/tomorrow" ]
             [ text "Tomorrow" ]
         , Material.Layout.link
-            [ Material.Options.onClick <| messages.newUrlHandler "/log" ]
+            [ Material.Options.onClick <| newUrl "/log" ]
             [ text "Log" ]
         , Material.Layout.link
-            [ Material.Options.onClick <| messages.newUrlHandler "/activities" ]
+            [ Material.Options.onClick <| newUrl "/activities" ]
             [ text "Activities" ]
         , Material.Layout.link
-            [ Material.Options.onClick <| messages.newUrlHandler "/new-activity" ]
+            [ Material.Options.onClick <| newUrl "/new-activity" ]
             [ text "New activity type" ]
         ]
     ]

@@ -60,19 +60,6 @@ type Msg
     | StopActivity Int
 
 
-viewMessages : View.ViewMessages Msg
-viewMessages =
-    { materialMsgHandler = Mdl
-    , newUrlHandler = NewUrl
-    , changeActivityNameHandler = ChangeActivityName
-    , changeActivityImageHandler = ChangeActivityImage
-    , changeActivitySliderHandler = ChangeActivitySlider
-    , saveActivityTypeHandler = SaveActivityType
-    , startActivityHandler = StartActivity
-    , stopActivityHandler = StopActivity
-    }
-
-
 route : Url.Parser (Route -> a) a
 route =
     Url.oneOf
@@ -258,7 +245,8 @@ locationView model =
 
         Just Activities ->
             View.activitiesPageView
-                viewMessages
+                Mdl
+                NewUrl
                 model.mdl
                 model.time
                 model.activities
@@ -268,14 +256,18 @@ locationView model =
 
         Just NewActivity ->
             View.editActivityPageView
-                viewMessages
+                Mdl
+                ChangeActivityName
+                ChangeActivityImage
+                ChangeActivitySlider
+                SaveActivityType
                 model.mdl
                 model.activityEdit
 
         Just (LogActivity activityId) ->
             case Activity.byId activityId model.activities of
                 Just activity ->
-                    View.logActivityPageView viewMessages model.mdl activity
+                    View.logActivityPageView Mdl StartActivity StopActivity model.mdl activity
 
                 Nothing ->
                     View.unknownActivityPageView
@@ -296,7 +288,7 @@ view model =
         , Material.Layout.fixedDrawer
         ]
         { header = [ View.pageHeader ]
-        , drawer = View.drawer viewMessages auth.name auth.image_url
+        , drawer = View.drawer NewUrl auth.name auth.image_url
         , tabs = ( [], [] )
         , main =
             [ div [ class "body-container fullpage" ]
