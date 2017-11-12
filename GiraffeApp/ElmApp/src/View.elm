@@ -202,7 +202,7 @@ editActivityPageView :
     -> Material.Model
     -> ActivityEdit
     -> Html msg
-editActivityPageView materialMsg changeActivityName changeActivityImage changeActivitySlider saveActivityType mdl activityEdit =
+editActivityPageView materialMsg changeName changeImage changeSlider saveActivityType mdl activityEdit =
     div []
         [ div []
             [ Material.Options.styled Html.h1
@@ -217,7 +217,7 @@ editActivityPageView materialMsg changeActivityName changeActivityImage changeAc
                 [ Material.Textfield.label "Name of activity type"
                 , Material.Textfield.floatingLabel
                 , Material.Textfield.value activityEdit.activity.name
-                , Material.Options.onInput changeActivityName
+                , Material.Options.onInput changeName
                 ]
                 []
             ]
@@ -228,7 +228,7 @@ editActivityPageView materialMsg changeActivityName changeActivityImage changeAc
                 [ Material.Textfield.label "URL to activity icon"
                 , Material.Textfield.floatingLabel
                 , Material.Textfield.value activityEdit.activity.imageUrl
-                , Material.Options.onInput changeActivityImage
+                , Material.Options.onInput changeImage
                 ]
                 []
             ]
@@ -237,7 +237,7 @@ editActivityPageView materialMsg changeActivityName changeActivityImage changeAc
                 [ Material.Typography.title ]
                 [ text "Relentlessness of the activity" ]
             , Material.Slider.view
-                [ Material.Slider.onChange changeActivitySlider
+                [ Material.Slider.onChange changeSlider
                 , Material.Slider.value <| toFloat activityEdit.sliderValue
                 , Material.Slider.max 34
                 , Material.Slider.min 1
