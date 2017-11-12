@@ -1,6 +1,6 @@
 port module Main exposing (main)
 
-import Activity exposing (Activity, ActivityEdit, minutesPerWeek)
+import Activity exposing (Activity)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Http
@@ -29,6 +29,12 @@ type alias AuthenticatedData =
     { name : String
     , image_url : String
     , id_token : String
+    }
+
+
+type alias ActivityEdit =
+    { activity : Activity
+    , sliderValue : Int
     }
 
 
@@ -70,15 +76,6 @@ route =
         , Url.map NewActivity (Url.s "new-activity")
         , Url.map LogActivity (Url.s "log-activity" </> Url.int)
         ]
-
-
-updatedActivity : ActivityEdit -> Activity
-updatedActivity activityEdit =
-    let
-        activity =
-            activityEdit.activity
-    in
-    { activity | minutesPerWeek = minutesPerWeek activityEdit }
 
 
 initActivity : Activity
@@ -124,6 +121,16 @@ postActivity apiUrl activity =
         , withCredentials = False
         }
         |> Http.send PostActivityResult
+
+
+minutesPerWeek : Int -> Int
+minutesPerWeek slider =
+    if slider <= 12 then
+        slider * 5
+    else if slider <= 20 then
+        12 * 5 + (slider - 12) * 15
+    else
+        12 * 5 + 8 * 15 + (slider - 20) * 30
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -192,12 +199,27 @@ update msg model =
             ( { model | activityEdit = { activityEdit | activity = { activity | imageUrl = url } } }, Cmd.none )
 
         ChangeActivitySlider value ->
-            ( { model | activityEdit = { activityEdit | sliderValue = round value } }, Cmd.none )
+            let
+                sliderValue =
+                    round value
+
+                activity =
+                    activityEdit.activity
+            in
+            ( { model
+                | activityEdit =
+                    { activityEdit
+                        | sliderValue = sliderValue
+                        , activity = { activity | minutesPerWeek = minutesPerWeek sliderValue }
+                    }
+              }
+            , Cmd.none
+            )
 
         SaveActivityType ->
             let
                 updated =
-                    updatedActivity model.activityEdit
+                    model.activityEdit.activity
             in
             ( { model
                 | activities = updated :: model.activities
@@ -262,7 +284,8 @@ locationView model =
                 ChangeActivitySlider
                 SaveActivityType
                 model.mdl
-                model.activityEdit
+                model.activityEdit.activity
+                (toFloat model.activityEdit.sliderValue)
 
         Just (LogActivity activityId) ->
             case Activity.byId activityId model.activities of

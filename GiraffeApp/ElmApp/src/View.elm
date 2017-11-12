@@ -13,7 +13,7 @@ module View
         , unknownPageView
         )
 
-import Activity exposing (Activity, ActivityEdit)
+import Activity exposing (Activity)
 import Html exposing (Html, div, header, img, p, text)
 import Html.Attributes exposing (class, id, src)
 import Material
@@ -200,9 +200,10 @@ editActivityPageView :
     -> (Float -> msg)
     -> msg
     -> Material.Model
-    -> ActivityEdit
+    -> Activity
+    -> Float
     -> Html msg
-editActivityPageView materialMsg changeName changeImage changeSlider saveActivityType mdl activityEdit =
+editActivityPageView materialMsg changeName changeImage changeSlider saveActivityType mdl activity sliderValue =
     div []
         [ div []
             [ Material.Options.styled Html.h1
@@ -216,7 +217,7 @@ editActivityPageView materialMsg changeName changeImage changeSlider saveActivit
                 mdl
                 [ Material.Textfield.label "Name of activity type"
                 , Material.Textfield.floatingLabel
-                , Material.Textfield.value activityEdit.activity.name
+                , Material.Textfield.value activity.name
                 , Material.Options.onInput changeName
                 ]
                 []
@@ -227,7 +228,7 @@ editActivityPageView materialMsg changeName changeImage changeSlider saveActivit
                 mdl
                 [ Material.Textfield.label "URL to activity icon"
                 , Material.Textfield.floatingLabel
-                , Material.Textfield.value activityEdit.activity.imageUrl
+                , Material.Textfield.value activity.imageUrl
                 , Material.Options.onInput changeImage
                 ]
                 []
@@ -238,14 +239,14 @@ editActivityPageView materialMsg changeName changeImage changeSlider saveActivit
                 [ text "Relentlessness of the activity" ]
             , Material.Slider.view
                 [ Material.Slider.onChange changeSlider
-                , Material.Slider.value <| toFloat activityEdit.sliderValue
+                , Material.Slider.value sliderValue
                 , Material.Slider.max 34
                 , Material.Slider.min 1
                 , Material.Slider.step 1
                 ]
             , Material.Options.styled p
                 [ Material.Typography.body1 ]
-                [ text <| formatMinutes (Activity.minutesPerWeek activityEdit) ++ " per week." ]
+                [ text <| formatMinutes activity.minutesPerWeek ++ " per week." ]
             ]
         , div []
             [ Material.Button.render materialMsg
