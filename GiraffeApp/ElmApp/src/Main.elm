@@ -133,6 +133,9 @@ update msg model =
     let
         activityEdit =
             model.activityEdit
+
+        updateActivityEdit model activityEdit =
+            { model | activityEdit = activityEdit }
     in
     case msg of
         Tick time ->
@@ -172,26 +175,36 @@ update msg model =
         Mdl materialMsg ->
             Material.update Mdl materialMsg model
 
+        -- Need to set activityId here, as a callback from Random.generate
         NewActivityId activityId ->
             let
                 activity =
-                    model.activityEdit.activity
+                    activityEdit.activity
+
+                updatedActivityEdit =
+                    { activityEdit | activity = { activity | id = activityId } }
             in
-            ( { model | activityEdit = { activityEdit | activity = { activity | id = activityId } } }, Cmd.none )
+            ( updateActivityEdit model updatedActivityEdit, Cmd.none )
 
         ChangeActivityName name ->
             let
                 activity =
-                    model.activityEdit.activity
+                    activityEdit.activity
+
+                updatedActivityEdit =
+                    { activityEdit | activity = { activity | name = name } }
             in
-            ( { model | activityEdit = { activityEdit | activity = { activity | name = name } } }, Cmd.none )
+            ( updateActivityEdit model updatedActivityEdit, Cmd.none )
 
         ChangeActivityImage url ->
             let
                 activity =
-                    model.activityEdit.activity
+                    activityEdit.activity
+
+                updatedActivityEdit =
+                    { activityEdit | activity = { activity | imageUrl = url } }
             in
-            ( { model | activityEdit = { activityEdit | activity = { activity | imageUrl = url } } }, Cmd.none )
+            ( updateActivityEdit model updatedActivityEdit, Cmd.none )
 
         ChangeActivitySlider value ->
             let
@@ -200,16 +213,14 @@ update msg model =
 
                 activity =
                     activityEdit.activity
-            in
-            ( { model
-                | activityEdit =
+
+                updatedActivityEdit =
                     { activityEdit
                         | sliderValue = sliderValue
                         , activity = { activity | minutesPerWeek = minutesPerWeek sliderValue }
                     }
-              }
-            , Cmd.none
-            )
+            in
+            ( updateActivityEdit model updatedActivityEdit, Cmd.none )
 
         SaveActivityType ->
             let
