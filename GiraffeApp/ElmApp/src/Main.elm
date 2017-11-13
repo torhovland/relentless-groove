@@ -244,8 +244,16 @@ update msg model =
 
         PostActivityResult (Err failure) ->
             let
+                errorMessage =
+                    case failure of
+                        Http.NetworkError ->
+                            "Unable to save activity due to connectivity issue."
+
+                        f ->
+                            "Error saving activity: " ++ toString f
+
                 ( snackbar, snackbarCmd ) =
-                    Material.Snackbar.add (Material.Snackbar.toast () ("Error saving activity: " ++ toString failure)) model.snackbar
+                    Material.Snackbar.add (Material.Snackbar.toast () errorMessage) model.snackbar
                         |> Material.Helpers.map2nd (Cmd.map Snackbar)
             in
             ( { model | snackbar = snackbar }, snackbarCmd )
