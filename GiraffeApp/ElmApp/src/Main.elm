@@ -40,11 +40,11 @@ type alias ActivityEdit =
 
 type alias Model =
     { time : Time
-    , location : Maybe Route
-    , apiUrl : String
-    , authenticatedData : AuthenticatedData
     , errorMessage : String
+    , authenticatedData : AuthenticatedData
     , mdl : Material.Model
+    , apiUrl : String
+    , location : Maybe Route
     , activities : List Activity
     , activityEdit : ActivityEdit
     }
