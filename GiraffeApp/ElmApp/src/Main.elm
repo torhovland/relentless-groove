@@ -5,7 +5,9 @@ import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Http
 import Material
+import Material.Helpers
 import Material.Layout
+import Material.Snackbar
 import Navigation
 import Random
 import Time exposing (Time)
@@ -40,11 +42,11 @@ type alias ActivityEdit =
 
 type alias Model =
     { time : Time
-    , errorMessage : String
     , authenticatedData : AuthenticatedData
     , mdl : Material.Model
     , apiUrl : String
     , location : Maybe Route
+    , snackbar : Material.Snackbar.Model ()
     , activities : List Activity
     , activityEdit : ActivityEdit
     }
@@ -54,6 +56,7 @@ type Msg
     = Tick Time
     | Authenticated AuthenticatedData
     | Mdl (Material.Msg Msg)
+    | Snackbar (Material.Snackbar.Msg ())
     | NewUrl String
     | UrlChange Navigation.Location
     | NewActivityId Int
@@ -89,8 +92,8 @@ init apiUrl location =
       , location = Url.parsePath route location
       , apiUrl = apiUrl
       , authenticatedData = AuthenticatedData "" "" ""
-      , errorMessage = ""
       , mdl = Material.model
+      , snackbar = Material.Snackbar.model
       , activities = Activity.initActivities
       , activityEdit = initActivityEdit
       }
@@ -240,10 +243,20 @@ update msg model =
             ( model, Cmd.none )
 
         PostActivityResult (Err failure) ->
-            ( { model | errorMessage = "Error creating activity: " ++ toString failure }, Cmd.none )
+            let
+                ( snackbar, snackbarCmd ) =
+                    Material.Snackbar.add (Material.Snackbar.toast () ("Error saving activity: " ++ toString failure)) model.snackbar
+                        |> Material.Helpers.map2nd (Cmd.map Snackbar)
+            in
+            ( { model | snackbar = snackbar }, snackbarCmd )
 
         Authenticated data ->
             ( { model | authenticatedData = data }, Cmd.none )
+
+        Snackbar msg_ ->
+            Material.Snackbar.update msg_ model.snackbar
+                |> Material.Helpers.map1st (\s -> { model | snackbar = s })
+                |> Material.Helpers.map2nd (Cmd.map Snackbar)
 
         StartActivity activityId ->
             ( { model
@@ -323,6 +336,7 @@ view model =
             [ div [ class "body-container fullpage" ]
                 [ View.signinView <| auth.idToken == ""
                 , locationView model
+                , Material.Snackbar.view model.snackbar |> Html.map Snackbar
                 ]
             ]
         }
