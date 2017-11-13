@@ -7,8 +7,8 @@ export function onSignIn(googleUser) {
 
   app.ports.authenticated.send({
     name: profile.getName(),
-    image_url: profile.getImageUrl(),
-    id_token: googleUser.getAuthResponse().id_token
+    imageUrl: profile.getImageUrl(),
+    idToken: googleUser.getAuthResponse().id_token
   });
 
   console.log("Received Google user.");

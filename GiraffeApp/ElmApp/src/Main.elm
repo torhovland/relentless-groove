@@ -27,8 +27,8 @@ type Route
 
 type alias AuthenticatedData =
     { name : String
-    , image_url : String
-    , id_token : String
+    , imageUrl : String
+    , idToken : String
     }
 
 
@@ -311,11 +311,11 @@ view model =
         , Material.Layout.fixedDrawer
         ]
         { header = [ View.pageHeader ]
-        , drawer = View.drawer NewUrl auth.name auth.image_url
+        , drawer = View.drawer NewUrl auth.name auth.imageUrl
         , tabs = ( [], [] )
         , main =
             [ div [ class "body-container fullpage" ]
-                [ View.signinView <| auth.id_token == ""
+                [ View.signinView <| auth.idToken == ""
                 , locationView model
                 ]
             ]
