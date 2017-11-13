@@ -3,6 +3,7 @@ module Activity
         ( Activity
         , byId
         , initActivities
+        , initActivity
         , isRunning
         , onScheduleRatio
         , remaining
@@ -119,6 +120,11 @@ activityGoal activity =
 onScheduleRatio : Time -> Activity -> Float
 onScheduleRatio time activity =
     loggedTime time activity / activityGoal activity
+
+
+initActivity : Activity
+initActivity =
+    Activity -1 "" "" 15 []
 
 
 initActivity1 : Activity

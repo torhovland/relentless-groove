@@ -78,14 +78,9 @@ route =
         ]
 
 
-initActivity : Activity
-initActivity =
-    Activity -1 "" "" 15 []
-
-
 initActivityEdit : ActivityEdit
 initActivityEdit =
-    ActivityEdit initActivity 3
+    ActivityEdit Activity.initActivity 3
 
 
 init : String -> Navigation.Location -> ( Model, Cmd Msg )
