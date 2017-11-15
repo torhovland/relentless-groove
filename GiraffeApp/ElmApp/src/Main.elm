@@ -87,10 +87,20 @@ initActivityEdit =
 
 
 init : String -> Navigation.Location -> ( Model, Cmd Msg )
-init apiUrl location =
+init configuredApiUrl location =
+    let
+        isDevelopment location =
+            location.host == "localhost:8080"
+
+        fullApiUrl configuredApiUrl =
+            if isDevelopment location then
+                "http://localhost:3000" ++ configuredApiUrl
+            else
+                configuredApiUrl
+    in
     ( { time = 0
       , location = Url.parsePath route location
-      , apiUrl = apiUrl
+      , apiUrl = configuredApiUrl |> fullApiUrl
       , authenticatedData = AuthenticatedData "" "" ""
       , mdl = Material.model
       , snackbar = Material.Snackbar.model
