@@ -262,8 +262,16 @@ update msg model =
                         f ->
                             "Error saving activity: " ++ toString f
 
+                toast =
+                    { message = errorMessage
+                    , action = Nothing
+                    , payload = ()
+                    , timeout = 5000 * Time.millisecond
+                    , fade = 1000 * Time.millisecond
+                    }
+
                 ( snackbar, snackbarCmd ) =
-                    Material.Snackbar.add (Material.Snackbar.toast () errorMessage) model.snackbar
+                    Material.Snackbar.add toast model.snackbar
                         |> Material.Helpers.map2nd (Cmd.map Snackbar)
             in
             ( { model | snackbar = snackbar }, snackbarCmd )
