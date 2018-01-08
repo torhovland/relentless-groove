@@ -29,18 +29,34 @@ open GiraffeApp.Models
 
 let authorize =
     requiresAuthentication (challenge JwtBearerDefaults.AuthenticationScheme)
+
+let errorHandler (ex : Exception) (logger : ILogger) =
+    logger.LogError(EventId(), ex, "An unhandled exception has occurred while executing the request.")
+    clearResponse
+    >=> setStatusCode 500
+    >=> text ex.Message
+
+let clientError (message : string) =
+    clearResponse
+    >=> setStatusCode 400
+    >=> text message
     
 let postActivity =
     fun (next : HttpFunc) (ctx : HttpContext) ->
         task {
-            let identity = ctx.User.Identity
-            let claimsIdentity = downcast identity : ClaimsIdentity
+            let claimsIdentity = downcast ctx.User.Identity : ClaimsIdentity
             let claim = claimsIdentity.Claims
                         |> Seq.filter (fun c -> c.Type.EndsWith "/nameidentifier")
                         |> Seq.head
 
             let userId = claim.Value
             let! activity = ctx.BindModel<ActivityType>()
+
+            if String.IsNullOrWhiteSpace activity.Name 
+            then
+                let response = clientError "You must supply an activity name." 
+                return! response next ctx
+
             let activityEntity = Activity.toEntity userId activity
             let configuration = ctx.GetService<IConfiguration>()
             let connectionString = configuration.["TableStorage"]
