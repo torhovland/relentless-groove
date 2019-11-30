@@ -1,3 +1,5 @@
+extern crate yew;
+
 use yew::{html, Component, ComponentLink, Html, ShouldRender};
 
 struct App {
