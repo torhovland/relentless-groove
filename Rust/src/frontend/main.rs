@@ -1,6 +1,5 @@
-extern crate yew;
-
 use yew::{html, Component, ComponentLink, Html, ShouldRender};
+use wasm_bindgen::prelude::*;
 
 struct App {
     clicked: bool,
@@ -40,6 +39,7 @@ impl Component for App {
     }
 }
 
-fn main() {
+#[wasm_bindgen]
+pub fn main() {
     yew::start_app::<App>();
 }
